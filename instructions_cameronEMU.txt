@@ -1,0 +1,54 @@
+cd to 
+~/cameron/EmulatorBoard/TriDAS_BoardPlus/emu
+     --note that Makefile lives here too.
+
+#setup environment
+source ~cscdev/setup_emulib_env.sh
+
+## modify $BUILD_HOME
+export set BUILD_HOME=/home/cscdev/cameron/EmulatorBoard/TriDAS_BoardPlus
+
+# If a compile of the full setup is needed
+Set=framework make -j 8 install >& make-install-framework.log
+# check for errors
+grep error: make-install-framework.log
+
+# in order to reset all of the compiled version
+Set=framework make -j 8 clean
+
+# note that the source code lives here....
+/home/cscdev/cameron/EmulatorBoard/TriDAS_BoardPlus/emu/emuDCS/CSCGEMTestStand/src/common/CSCGEMTestApplication.cc
+
+run the startup script
+xdaq.exe -h 165.91.180.31 -p 20016 -e ../xml/tamu_test.profile -c  ../xml/tamu_test2018.xml
+
+go to the webpage
+http://165.91.180.31:20016/urn:xdaq-application:service=hyperdaq
+
+click on the app
+CSCGEMTestApplication
+
+either edit the file;
+/home/cscdev/cameron/EmulatorBoard/TriDAS_BoardPlus/emu/emuDCS/CSCGEMTestStand/tmp/clctpattern.txt
+or create a new one
+
+run the function;
+Converter Human Readable Cfeb txt file to Cfeb Pat File
+
+upload the patterns with the suffix;
+_ClctPattern_CFEB3_tmbc.pat
+to the emulator board using the function;
+Loading the File to Emulator Board
+
+send the files to the tmb using the function; 
+Loading the File to Emulator Board
+
+check the last moun using the CLCT info readout
+
+check the number of pretriggers using the TMB Utils function
+Print TMB Counters
+
+
+
+#Note: TMB.h/cc files can be found in :
+/home/cscdev/cameron/EmulatorBoard/TriDAS_BoardPlus/emu/emuDCS/PeripheralCore/src/common
