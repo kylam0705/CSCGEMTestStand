@@ -10,12 +10,12 @@
 
 #include "xdaq/WebApplication.h"
 #include "emu/pc/TMB.h"
-#include "GEMPatternGen.h"
-#include "PatternGen.h"
+//#include "GEMPatternGen.h"
+//#include "PatternGen.h"
 //#include "CSCConstants.h"
-#include "pattern_convert.h"
-#include "Yuriy_CLCT_PatternGen.h"
-
+//#include "pattern_convert.h"
+//#include "Yuriy_CLCT_PatternGen.h"
+#include "Set.h"
 
 //
 #include "emu/pc/EmuPeripheralCrateBase.h"
@@ -98,9 +98,90 @@ protected:
   char Fiber7PatName[200];
 
   bool PatLoadError;
-  bool FileLoadedToBoard; //make this an array of 8 later
 
   std::vector<TMB*>   tmbVector;
+
+  ///////////////////////////////////////////////////////////////////////
+
+  cw::Set patternSet;
+
+  char GetOTMBType[1] = {'c'};
+
+  // new CLCT Input Buffers
+  char GetCLCT_bx_char[6];
+  char GetCLCT_key_char[6];
+  char GetCLCT_pid_char[6];
+  char GetCLCT_nhit_char[6];
+
+  // new Comparator hit Buffers
+  char GetHit_muon1_layer0_char[6];
+  char GetHit_muon1_layer1_char[6];
+  char GetHit_muon1_layer2_char[6];
+  char GetHit_muon1_layer3_char[6];
+  char GetHit_muon1_layer4_char[6];
+  char GetHit_muon1_layer5_char[6];
+  char GetHit_muon1_bx_char[6];
+
+  // new GEM Input Buffers
+  char GetGEM_bx_char[6];
+  char GetGEM_roll_char[6];
+  char GetGEM_pad_char[6];
+  char GetGEM_size_char[6];
+  char GetGEM_layer_char[6];
+  // new CLCT Input Data
+  int GetCLCT_bx_int;
+  int GetCLCT_key_int;
+  int GetCLCT_pid_int;
+  int GetCLCT_nhit_int;
+  //new comparator hit data, by default at BX6
+  int GetHit_muon1_layer0_int;
+  int GetHit_muon1_layer1_int;
+  int GetHit_muon1_layer2_int;
+  int GetHit_muon1_layer3_int;
+  int GetHit_muon1_layer4_int;
+  int GetHit_muon1_layer5_int;
+  int GetHit_muon1_bx_int;
+
+  // new GEM Input Data
+  int GetGEM_bx_int;
+  int GetGEM_roll_int;
+  int GetGEM_pad_int;
+  int GetGEM_size_int;
+  int GetGEM_layer_int;
+
+  char GetSaveDir[200];
+  char GetSetPrefix[200];
+
+  bool FileLoadedToBoard;
+
+  // Pattern Study Automation~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  char GetNtrials_char[200];
+  int  GetNtrials_int;
+  int  CLCT0_Counter;
+  int  CLCT1_Counter;
+  std::ostringstream OutputStringTMBStatus[10];
+
+  // Vars for AUTO pattern Studies
+  int NumMuonsInStudy;
+  int NumFreeParams;
+  int TrialsPerStep;
+  char TrialsPerStep_char[200];
+  char ParamScanOutFile[200];
+  // new CLCT Input Buffers	// ps == Parameter Scan
+  char GetCLCT_bx_ps_char[32];
+  char GetCLCT_key_ps_char[32];
+  char GetCLCT_pid_ps_char[32];
+  char GetCLCT_nhit_ps_char[32];
+  std::vector<std::string> GetCLCT_ps_char;
+  // new CLCT Input Data
+  int GetCLCT_bx_ps_int;
+  int GetCLCT_key_ps_int;
+  int GetCLCT_pid_ps_int;
+  int GetCLCT_nhit_ps_int;
+  
+  std::vector<cw::CLCT> 	CLCT_ps_vec;
+  std::vector<cw::RangeParam>	Free_params;
+
 
 
 public:
@@ -160,14 +241,8 @@ private:
 
   void CfebPatternConverter(xgi::Input * in, xgi::Output * out );
 
-  //Test button for loading the file to the emulator board
-  void LoadToEmuBoard(xgi::Input * in, xgi::Output * out );
-
   //Test button for sending the file from the emulator board
   void SendFromEmuBoard(xgi::Input * in, xgi::Output * out );
-
-  //Clears the data from the emulator board
-  void ClearEmuBoard(xgi::Input * in, xgi::Output * out );
 
   void OutputCLCTInfo(xgi::Input * in, xgi::Output * out );
 
@@ -176,9 +251,35 @@ private:
   void CrateConfiguration(xgi::Input * in, xgi::Output * out ) throw (xgi::exception::Exception);
 
 
+  void GetOTMBCompileType(xgi::Input * in, xgi::Output * out);
+  // Cameron's new GUI Functions (Jan. 9 2020), Tao, Oct, 2020
+  void AddComparatorHit(xgi::Input * in, xgi::Output * out);
 
+  void AddCLCT(xgi::Input * in, xgi::Output * out);
 
+  void AddGEM(xgi::Input * in, xgi::Output * out);
 
+  void LoadToEmuBoard(xgi::Input * in, xgi::Output * out );
+
+  void SaveCurrentSet(xgi::Input * in, xgi::Output * out );	// To Be Removed
+
+  void SaveAsPat(xgi::Input * in, xgi::Output * out);
+
+  void SaveAsTxt(xgi::Input * in, xgi::Output * out);
+
+  void ClearEmuBoard(xgi::Input * in, xgi::Output * out );
+
+  void ClearSet(xgi::Input * in, xgi::Output * out );
+
+  void RunStudy(xgi::Input * in, xgi::Output * out );
+
+  void PrintTMBCounters(xgi::Input * in, xgi::Output * out);
+
+  void AddCLCTParamScan(xgi::Input * in, xgi::Output * out);
+
+  void RunParamScan(xgi::Input * in, xgi::Output * out);
+  
+  void DOESWORK(xgi::Input * in, xgi::Output * out);
 };
 
 }} // namespaces

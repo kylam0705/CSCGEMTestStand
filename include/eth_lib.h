@@ -35,7 +35,9 @@ extern int nrdat;
 #endif
 
 
-int eth_open(char *dev_name);
+int eth_open(const char *dev_name);
+
+int eth_open_device();
 
 int eth_register_mac();
 

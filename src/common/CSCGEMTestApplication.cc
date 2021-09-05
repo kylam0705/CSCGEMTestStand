@@ -25,7 +25,8 @@
 #include "emu/pc/VMECC.h"
 #include "emu/pc/DDU.h"
 
-
+//added by Ben for debugging
+//#include "CLCT.h"
 
 // XDAQ includes
 #include "cgicc/Cgicc.h"
@@ -41,6 +42,7 @@
 #include <math.h>
 #include <string>
 #include <unistd.h> // for sleep()
+#include <ctype.h> // for toupper()
 
 // radtest includes
 #include "eth_lib.h"
@@ -67,7 +69,9 @@ using std::endl;
 using std::cout;
 using std::string;
 using emu::utils::bindMemberMethod;
-
+using cw::Hit;
+using cw::CLCT;
+using cw::Cluster;
 
 
 //This is the section for the default values displayed on the webpage:
@@ -92,12 +96,26 @@ CSCGEMTestApplication::CSCGEMTestApplication(xdaq::ApplicationStub * s)
   xgi::bind(this, &CSCGEMTestApplication::Yuriy_CLCT_PatternConverter, "Yuriy_CLCT_PatternConverter");
   xgi::bind(this, &CSCGEMTestApplication::GemPatternConverter, "GemPatternConverter");
   xgi::bind(this, &CSCGEMTestApplication::CfebPatternConverter, "CfebPatternConverter");
-  xgi::bind(this, &CSCGEMTestApplication::LoadToEmuBoard, "LoadToEmuBoard");
   xgi::bind(this, &CSCGEMTestApplication::SendFromEmuBoard, "SendFromEmuBoard");
   xgi::bind(this, &CSCGEMTestApplication::ClearEmuBoard, "ClearEmuBoard");
   xgi::bind(this, &CSCGEMTestApplication::OutputCLCTInfo, "OutputCLCTInfo");
 
 
+  // Pattern Studies Methods
+  xgi::bind(this, &CSCGEMTestApplication::GetOTMBCompileType, "GetOTMBCompileType");
+  xgi::bind(this, &CSCGEMTestApplication::AddCLCT, "AddCLCT");
+  xgi::bind(this, &CSCGEMTestApplication::AddComparatorHit, "AddComparatorHit");
+  xgi::bind(this, &CSCGEMTestApplication::AddGEM, "AddGEM");
+  xgi::bind(this, &CSCGEMTestApplication::LoadToEmuBoard, "LoadToEmuBoard");
+  xgi::bind(this, &CSCGEMTestApplication::SaveCurrentSet, "SaveCurrentSet");	// Outdated! to be REMOVED
+  xgi::bind(this, &CSCGEMTestApplication::SaveAsPat, "SaveAsPat");
+  xgi::bind(this, &CSCGEMTestApplication::SaveAsTxt, "SaveAsTxt");
+  xgi::bind(this, &CSCGEMTestApplication::ClearSet, "ClearSet");
+  xgi::bind(this, &CSCGEMTestApplication::RunStudy, "RunStudy");
+  xgi::bind(this, &CSCGEMTestApplication::AddCLCTParamScan, "AddCLCTParamScan");
+  xgi::bind(this, &CSCGEMTestApplication::RunParamScan, "RunParamScan");
+
+  xgi::bind(this, &CSCGEMTestApplication::DOESWORK, "DOESWORK");
 
   //parsing section
   XML_or_DB_ = "xml";
@@ -135,6 +153,12 @@ CSCGEMTestApplication::CSCGEMTestApplication(xdaq::ApplicationStub * s)
   sprintf(CfebtxtFile,"clctpattern.txt");
   sprintf(YuriyConvtxtFile,"Yuriy_pattern.txt");
 
+  // Cameron Addition : Jan. 2020
+  sprintf(GetSetPrefix, patternSet.Prefix.c_str());
+
+  sprintf(TrialsPerStep_char, "1000");
+
+
   EmuBoardLocation = "/dev/schar3";
 
   for (int i = 0; i < 8; ++i) {
@@ -163,6 +187,14 @@ CSCGEMTestApplication::CSCGEMTestApplication(xdaq::ApplicationStub * s)
     sprintf(testingarray[i],"");
   }
 
+  //TMB * thisTMB = tmbVector[1];
+  //CLCT0_Counter = thisTMB->GetCounter(cw::tmb_counters[0]);
+  //CLCT1_Counter = thisTMB->GetCounter(cw::tmb_counters[1]);
+  
+  for(int i=0; i < 4; i++){
+    std::string str;
+    GetCLCT_ps_char.push_back(str);
+  }
 }
 
 bool CSCGEMTestApplication::ParsingXML(){
@@ -281,11 +313,11 @@ void CSCGEMTestApplication::Default(xgi::Input * in, xgi::Output * out ) throw (
 
   string urn = getApplicationDescriptor()->getURN();
 
-  emu::utils::headerXdaq(out, this, "GEM-CSC Test Stand");
+  emu::utils::headerXdaq(out, this, "GEM-CSC Pattern Studies");
 
   //*out << "Hello World!";
   //TMB * thisTMB   = tmbVector[chamber_index];
-  xmlFile_.fromString("$xdaqPWD/xml/tamu_crate_config_2tmbs_lab1.xml");
+  xmlFile_.fromString("$BUILD_HOME/xml/tamu_crate_config_2tmbs2019_GEM.xml");
   std::string testxmlfilename = xmlFile_.toString();
   std::cout << "This is the xmlFile_ name before the fromString: " << testxmlfilename << std::endl << std::endl;
   xmlFile_.fromString(emu::utils::performExpansions(xmlFile_));
@@ -425,7 +457,8 @@ void CSCGEMTestApplication::Default(xgi::Input * in, xgi::Output * out ) throw (
   else if (c4 == "1") *out << cgicc::input().set("type", "button").set("value", "4").set("style", "color:red") << endl;
   else *out << cgicc::input().set("type", "button").set("value", "4") << endl;
   if (c5 == "0") *out << cgicc::input().set("type", "button").set("value", "5").set("style", "color:green") << endl;
-  else if (c5 == "1") *out << cgicc::input().set("type", "button").set("value", "5").set("style", "color:red") << endl;
+  else if ey HalfStrip : " << cgicc::input().set("type","text").set("name","GetCLCT_key_char").set("size","7").set("value", GetCLCT_key_char) << endl;
+  *out << " PiD :(c5 == "1") *out << cgicc::input().set("type", "button").set("value", "5").set("style", "color:red") << endl;
   else *out << cgicc::input().set("type", "button").set("value", "5") << endl;
   if (c6 == "0") *out << cgicc::input().set("type", "button").set("value", "6").set("style", "color:green") << endl;
   else if (c6 == "1") *out << cgicc::input().set("type", "button").set("value", "6").set("style", "color:red") << endl;
@@ -464,6 +497,319 @@ void CSCGEMTestApplication::Default(xgi::Input * in, xgi::Output * out ) throw (
 *out << cgicc::form() << endl;
 *out << cgicc::fieldset() << endl;
 */
+
+cgicc::form_iterator name = cgi.getElement("tmb");
+int tmb;
+if(name != cgi.getElements().end()) {
+  tmb = cgi["tmb"]->getIntegerValue();
+  std::cout << "TMBStatus:  TMB=" << tmb << std::endl;
+  TMB_ = tmb;
+} else {
+  std::cout << "TMBStatus: No TMB" << std::endl ;
+  tmb = TMB_;
+}
+
+
+tmb = 1;
+TMB * thisTMB = tmbVector[tmb];
+std::cout << "the value for tmb is = " << tmb << std::endl;
+std::cout << "The tmbVector[tmb] = " << tmbVector[tmb] << std::endl;
+
+
+  *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
+  *out << cgicc::legend("Get OTMB Compile Type").set("style", "color:blue") ;
+  //*out << "The COMPILE_TYPE is:" << std::hex << COMPILE_TYPE << std::dec << endl;
+  // Get OTMB Type From CSCGEM Test Page
+  //*out << cgicc::pre();
+  *out << cgicc::br() << endl;
+  *out << "Select OTMB compile type, a for MEX/1, c/d for ME1/1, c for plus endcap " << endl;
+  *out << cgicc::form().set("method", "GET").set("action","/" + urn + "/GetOTMBCompileType") << endl;
+  *out << " OTMB Compile Type(a/c/d) : " << cgicc::input().set("type","text").set("name","GetOTMBType").set("size","1").set("value", GetOTMBType) << endl;
+  *out << cgicc::input().set("type","submit").set("value","Set OTMB Type").set("name", "Get OTMB Type") << endl;
+  *out << cgicc::br() << endl;
+  *out << cgicc::form() << endl;
+  *out << cgicc::fieldset() << endl;
+
+  //
+  *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
+  *out << cgicc::legend("Define Pattern Set").set("style", "color:blue") ;
+  *out << cgicc::br() << endl;
+  *out << "CFEB CLCT" << endl;
+  *out << cgicc::form().set("method", "GET").set("action","/" + urn + "/AddCLCT") << endl;
+  *out << "Bx : " << cgicc::input().set("type","text").set("name","GetCLCT_bx_char").set("size","7").set("value", GetCLCT_bx_char) << endl;
+  *out << " Key HalfStrip : " << cgicc::input().set("type","text").set("name","GetCLCT_key_char").set("size","7").set("value", GetCLCT_key_char) << endl;
+  *out << " PiD : " << cgicc::input().set("type","text").set("name","GetCLCT_pid_char").set("size","7").set("value", GetCLCT_pid_char) << endl;  
+  *out << " N Hits : " << cgicc::input().set("type","text").set("name","GetCLCT_nhit_char").set("size","7").set("value", GetCLCT_nhit_char) << endl;
+  *out << cgicc::input().set("type","submit").set("value","Add").set("name", "Add CLCT") << endl;
+  *out << cgicc::form() << endl;
+  *out << cgicc::br() << endl;
+  *out << "halfstrip of Comparator Hits (- means no hit)" << endl;
+  *out << cgicc::form().set("method", "GET").set("action","/" + urn + "/AddComparatorHit") << endl;
+  *out << " layer0 : " << cgicc::input().set("type","text").set("name","GetHit_muon1_layer0_char").set("size","7").set("value", GetHit_muon1_layer0_char) << endl;
+  *out << " layer1 : " << cgicc::input().set("type","text").set("name","GetHit_muon1_layer1_char").set("size","7").set("value", GetHit_muon1_layer1_char) << endl;
+  *out << " layer2 : " << cgicc::input().set("type","text").set("name","GetHit_muon1_layer2_char").set("size","7").set("value", GetHit_muon1_layer2_char) << endl;
+  *out << " layer3 : " << cgicc::input().set("type","text").set("name","GetHit_muon1_layer3_char").set("size","7").set("value", GetHit_muon1_layer3_char) << endl;
+  *out << " layer4 : " << cgicc::input().set("type","text").set("name","GetHit_muon1_layer4_char").set("size","7").set("value", GetHit_muon1_layer4_char) << endl;
+  *out << " layer5 : " << cgicc::input().set("type","text").set("name","GetHit_muon1_layer5_char").set("size","7").set("value", GetHit_muon1_layer5_char) << endl;
+  *out << " BX : " << cgicc::input().set("type","text").set("name","GetHit_muon1_bx_char").set("size","7").set("value", GetHit_muon1_bx_char) << endl;
+  *out << cgicc::input().set("type","submit").set("value","Add").set("name", "Add ComparatorHit") << endl;
+  *out << cgicc::form() << endl;
+  *out << cgicc::br() << endl;
+  *out << "GEM Cluster" << endl;
+  *out << cgicc::form().set("method", "GET").set("action","/" + urn + "/AddGEM") << endl;
+  *out << "    real VFAT ID         Vs    natural ID " << cgicc::br() << endl;
+  *out << "roll0: 7,  15,  23       Vs   0,   1,   2 " << cgicc::br() << endl;
+  *out << "roll1: 6,  14,  22       Vs   3,   4,   5 " << cgicc::br() << endl;
+  *out << "roll2: 5,  13,  21       Vs   6,   7,   8 " << cgicc::br() << endl;
+  *out << "roll3: 4,  12,  20       Vs   9,  10,  11 " << cgicc::br() << endl;
+  *out << "roll4: 3,  11,  19       Vs  12,  13,  14 " << cgicc::br() << endl;
+  *out << "roll5: 2,  10,  18       Vs  15,  16,  17 " << cgicc::br() << endl;
+  *out << "roll6: 1,   9,  17       Vs  18,  17,  20 " << cgicc::br() << endl;
+  *out << "roll7: 0,   8,  16       Vs  21,  22,  23 " << cgicc::br() << endl;
+  *out << "Bx : " << cgicc::input().set("type","text").set("name","GetGEM_bx_char").set("size","7").set("value", GetGEM_bx_char) << endl;
+  *out << " Roll(0-7) : " << cgicc::input().set("type","text").set("name","GetGEM_roll_char").set("size","7").set("value", GetGEM_roll_char) << endl;
+  //*out << " Vfat(0-23) : " << cgicc::input().set("type","text").set("name","GetGEM_pad_char").set("size","7").set("value", GetGEM_pad_char) << endl;
+  *out << " Pad(0-191) : " << cgicc::input().set("type","text").set("name","GetGEM_pad_char").set("size","7").set("value", GetGEM_pad_char) << endl;
+  *out << " Size(0-7) : " << cgicc::input().set("type","text").set("name","GetGEM_size_char").set("size","7").set("value", GetGEM_size_char) << endl;
+  *out << " Layer(0-1) : " << cgicc::input().set("type","text").set("name","GetGEM_layer_char").set("size","7").set("value", GetGEM_layer_char) << endl;
+  *out << cgicc::input().set("type","submit").set("value","Add").set("name", "Add GEM") << endl;
+  *out << cgicc::form() << endl;
+  *out << cgicc::fieldset() << endl;
+
+  *out << cgicc::fieldset().set("style", "background-color:#FFFFBB; font-size: 11pt") << endl;
+  *out << cgicc::legend("Current Pattern Set").set("style","color:blue; font-size: 14pt") << endl;
+  *out << cgicc::pre();
+  *out <<"OTMB type "<< GetOTMBType[0] << " CSC: " << endl;
+  *out << "bx    keystrip    pattern    nhits   type   \t{ (bx,hs,layer, type) }" << endl;
+  for(unsigned int i=0; i < patternSet.CSC.size(); i++){
+    *out << patternSet.CSC[i] << endl;
+  }
+  *out << cgicc::br() << endl;
+  *out << "OTMB type "<< GetOTMBType[0] << " Comparato hits: " << endl;
+  *out << "bx hs layer type\t{ (bx,hs,layer,type) }" << endl;
+  for(unsigned int i=0; i < patternSet.ComparatorHit.size(); i++){
+    *out << patternSet.ComparatorHit[i] << endl;
+  }
+  *out << cgicc::br() << endl;
+  *out << "GEM: " << endl;
+  *out << "bx\troll\tpad\tsize\tlayer\trealVfatID" << endl;
+  for(unsigned int i=0; i < patternSet.GEM.size(); i++){
+    unsigned int clusterbits = patternSet.GEM[i].info();
+    *out << patternSet.GEM[i] <<" \t "<< std::bitset<14>(clusterbits)<< endl;
+  }
+  *out << cgicc::pre();
+  *out << cgicc::br() << endl;
+  *out << cgicc::form().set("method", "GET").set("action","/" + urn + "/LoadToEmuBoard") << endl;
+  *out << cgicc::input().set("type","submit").set("value","Load EmuBoard").set("name", "LoadToEmuBoard") << endl;
+  *out << cgicc::form() << endl;  
+  *out << cgicc::fieldset();
+
+
+  *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
+  *out << cgicc::legend("Save Current Set").set("style", "color:blue; font-size: 14pt") << endl;
+  *out << "Prefix : " << endl;
+  *out << cgicc::form().set("method", "GET").set("action", "/" + urn + "/SaveAsPat") << endl;
+  *out << cgicc::input().set("type","text").set("name","GetSetPrefix").set("size","24").set("value",GetSetPrefix) << endl;
+  *out << cgicc::br() << endl;
+  *out << cgicc::br() << endl;
+  *out << "Save Directory : " << endl;
+  *out << cgicc::input().set("type","text").set("name","GetSaveDir").set("size","110").set("value",GetSaveDir) << endl;
+  *out << cgicc::br() << endl;
+  *out << cgicc::br() << endl;
+  *out << cgicc::form() << endl;
+  *out << cgicc::table().set("border","0") << endl;
+  *out << cgicc::td().set("ALIGN", "left") << endl;
+  *out << cgicc::form().set("method", "GET").set("action","/" + urn + "/SaveAsPat") << endl;
+  *out << cgicc::input().set("type", "submit").set("value","Save as {.pat}").set("name", "SaveAsPat") << endl;
+  *out << cgicc::form() << endl;
+  *out << cgicc::td() << endl;
+  *out << cgicc::td().set("ALIGN", "left") << endl;
+  *out << cgicc::form().set("method", "GET").set("action", "/" + urn + "/SaveAsTxt") << endl;
+  *out << cgicc::input().set("type", "submit").set("value","Save as (.txt)").set("name", "SaveAsTxt") << endl;
+  *out << cgicc::form() << endl;
+  *out << cgicc::td() << endl;
+  *out << cgicc::table() << endl;
+  *out << cgicc::fieldset();
+
+  *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
+  *out << cgicc::legend("Study Pattern Set").set("style", "color:blue; font-size: 14pt") << endl;
+  *out << cgicc::form().set("method", "GET").set("action", "/" + urn + "/RunStudy" ) << endl;
+  *out << "Number of Trials : " << endl;
+  *out << cgicc::input().set("type","text").set("name","GetNtrials_char").set("size","10").set("value",GetNtrials_char) << endl;
+  *out << cgicc::input().set("type", "submit").set("value", "Run").set("name", "Run Study") << endl;
+  *out << cgicc::form() << endl;
+  *out << cgicc::br() << endl;
+  *out << cgicc::pre();
+  thisTMB->RedirectOutput(out);
+  thisTMB->GetCounters();
+  cout << "TMB Counter # 29 = " << thisTMB->GetCounter(29) << endl;
+  cout << "TMB Counter # 30 = " << thisTMB->GetCounter(30) << endl;
+
+  thisTMB->PrintCounters(29);
+  *out << endl;
+  thisTMB->PrintCounters(30);
+  thisTMB->RedirectOutput(&std::cout);
+  *out << cgicc::pre();
+  *out << cgicc::br() << endl;
+  *out << cgicc::pre();
+  *out << "Statistics : " << endl;
+  *out << "# Trials = " << patternSet.N_trials << endl;
+  for(unsigned int i=0; i < patternSet.Results_l.size(); i++){
+    *out << patternSet.Results_l[i] << endl;
+  }
+  *out << cgicc::pre();
+  *out << cgicc::fieldset();
+
+  *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
+  *out << cgicc::legend("Clear Current Set").set("style", "color:blue; font-size: 14pt") << endl; 
+  *out << cgicc::form().set("method", "GET").set("action", "/" + urn + "/ClearSet" ) << endl;
+  *out << cgicc::input().set("type", "submit").set("value", "Clear Current Set").set("name", "Clear Current Set") << " Deletes *.pat in (default_dir), and resets patternSet object" << endl;
+  *out << cgicc::form() << endl;
+  *out << cgicc::fieldset();
+
+  *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
+  *out << cgicc::legend("Clear the Emulator Board").set("style", "color:blue") ;
+  *out << cgicc::form().set("method", "GET").set("action", "/" + urn + "/ClearEmuBoard" ) << endl;
+  *out << cgicc::input().set("type", "submit").set("value", "Clear Emulator Board").set("name", "Clear Emulator Board") << " Loads Empty patterns to Emulator Board" << endl;
+  *out << cgicc::form() << endl;
+  *out << cgicc::fieldset() << endl;
+
+
+// Automation Section!!
+  *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
+  *out << cgicc::legend("Parameter Scan").set("style", "color:blue; font-size:14pt");
+  *out << cgicc::form().set("method", "GET").set("action","/" + urn + "/AddCLCTParamScan") << endl;
+  *out << "Bx : " << cgicc::input().set("type","text").set("name","GetCLCT_bx_ps_char").set("size","7").set("value", GetCLCT_bx_ps_char) << endl;
+  *out << " Key HalfStrip : " << cgicc::input().set("type","text").set("name","GetCLCT_key_ps_char").set("size","7").set("value", GetCLCT_key_ps_char) << endl;
+  *out << " PiD : " << cgicc::input().set("type","text").set("name","GetCLCT_pid_ps_char").set("size","7").set("value", GetCLCT_pid_ps_char) << endl;
+  *out << " N Hits : " << cgicc::input().set("type","text").set("name","GetCLCT_nhit_ps_char").set("size","7").set("value", GetCLCT_nhit_ps_char) << endl;
+  *out << cgicc::input().set("type","submit").set("value","Add").set("name", "Add CLCT Param Scan") << endl;
+  *out << cgicc::form() << endl;
+  
+  *out << cgicc::form().set("method","GET") << endl;
+  //*out << cgicc::form().set("method", "GET").set("action","/" +urn+ "RunParamScan") << endl;
+  *out << cgicc::table().set("border", "1") << endl;
+  *out << cgicc::td().set("ALIGN", "Center") << endl;
+  *out << cgicc::textarea().set("name", "ParamScanMuonList").set("rows","5").set("cols","150").set("WRAP","OFF");
+  *out << "Muons in Study : " << CLCT_ps_vec.size() << endl;
+  *out << "CSC\n#\tbx\tkey\tpid\tNhit\t\t{ (bx,ly,hs, type) }\n";
+  for(unsigned int i=0; i < CLCT_ps_vec.size(); i++){
+	*out << i << '\t' << CLCT_ps_vec[i] << endl;
+  }
+   
+  *out << cgicc::textarea() << endl; 
+  *out << cgicc::td() << endl;
+
+  *out << cgicc::td().set("ALIGN", "Center") << endl;
+  *out << cgicc::textarea().set("name", "ParamScanMuonList").set("rows","5").set("cols","150").set("WRAP","OFF");
+  *out << "Free Parameters : " << Free_params.size() << endl; 
+  for(unsigned int i=0; i < Free_params.size(); i++){
+	*out << Free_params[i] << endl;
+  }
+
+  *out << cgicc::textarea() << endl;
+  *out << cgicc::td() << endl;
+  *out << cgicc::table() << endl;
+  *out << cgicc::br();
+
+//  *out << cgicc::fieldset() << endl;
+//  *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
+
+  *out << cgicc::legend("Run Parameter Scan").set("style", "color:blue") ;
+  *out << cgicc::form() << endl;
+*out << cgicc::form().set("method", "GET").set("action","/" +urn+ "/RunParamScan") << endl;
+  *out << "Trials / Step  " << cgicc::input().set("type","text").set("name","TrialsPerStep_char").set("size","7").set("value",TrialsPerStep_char) << endl;
+  *out << cgicc::br();
+  *out << "Output File  " << cgicc::input().set("type","text").set("name","ParamScanOutFile").set("size","100").set("value",ParamScanOutFile) << endl;
+  *out << cgicc::input().set("type","submit").set("value","Run").set("name", "RunParamScan") << endl;
+  *out << cgicc::form() << endl;
+  *out << cgicc::fieldset() << endl;
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  LOG4CPLUS_INFO(getApplicationLogger(), "Start PrintCounters");
+  thisTMB->RedirectOutput(&OutputStringTMBStatus[tmb]);
+  thisTMB->GetCounters();
+  thisTMB->PrintCounters();
+  thisTMB->PrintGemCounters();
+  thisTMB->RedirectOutput(&std::cout);
+  LOG4CPLUS_INFO(getApplicationLogger(), "Done PrintCounters");
+
+
+
+  *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
+  *out << cgicc::legend("Run Parameter Scan").set("style", "color:blue") ;  
+  *out << cgicc::form().set("method", "GET").set("action","/" +urn+ "/ClearEmuBoard") << endl;
+  *out << cgicc::input().set("type","submit").set("value","Run").set("name", "RunParamScan") << endl;
+  *out << cgicc::form() << endl;
+  *out << cgicc::fieldset() << endl;
+
+
+
+
+*out << cgicc::fieldset();
+
+  *out << cgicc::form().set("method","GET") << std::endl ;
+  *out << cgicc::pre();
+  *out << cgicc::textarea().set("name","CrateTestTMBOutput")
+    .set("rows","50")
+    .set("cols","150")
+    .set("WRAP","OFF");
+  *out << OutputStringTMBStatus[tmb].str() << std::endl ;
+  *out << cgicc::textarea();
+  OutputStringTMBStatus[tmb].str("");
+  *out << cgicc::pre();
+  *out << cgicc::form() << std::endl ;
+
+
+*out << cgicc::legend("CLCT Info").set("style","color:blue") << std::endl ;
+*out << cgicc::pre();
+thisTMB->RedirectOutput(out);
+thisTMB->DecodeCLCT();
+thisTMB->PrintCLCT();
+thisTMB->RedirectOutput(&std::cout);
+*out << cgicc::pre();
+*out << cgicc::fieldset();
+
+
+  if (thisTMB->GetGemEnabled()) {
+    *out << cgicc::td(); 
+    *out << cgicc::td().set("valign", "top");
+    *out << cgicc::fieldset();
+    *out << cgicc::legend("GEM Info").set("style","color:blue") << std::endl ;
+    *out << cgicc::pre();
+    thisTMB->RedirectOutput(out);
+    thisTMB->DecodeGEMHits();
+    thisTMB->PrintGEMHits();
+    thisTMB->RedirectOutput(&std::cout);
+    *out << cgicc::pre();
+    *out << cgicc::fieldset();
+   }
+   if (thisTMB->GetGemEnabled()){
+    *out << cgicc::td(); 
+    *out << cgicc::table();
+   }
+
+/*
+*out << cgicc::fieldset();
+*out << cgicc::legend("CLCT Info").set("style","color:blue") << std::endl ;
+*out << cgicc::pre();
+thisTMB->RedirectOutput(out);
+thisTMB->DecodeCLCT();
+thisTMB->PrintCLCT();
+thisTMB->RedirectOutput(&std::cout);
+*out << cgicc::pre();
+*out << cgicc::fieldset();
+*/
+
+ // *out << cgicc::table().set("border","0");
+  //*out << cgicc::h2("System Utilities")<< std::endl;
+  //
+  //  *out << cgicc::td();
+  //
+
+//  *out << cgicc::br() << endl;
+//  *out << cgicc::br() << endl;
+/*
   *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
   *out << cgicc::legend("number of mouns to include in txt pattern file (up to 512)").set("style", "color:blue") ;
   *out << cgicc::form().set("method", "GET").set("action", "/" + urn + "/GenGEMPattxtFileMounN" ) << endl;
@@ -490,7 +836,7 @@ void CSCGEMTestApplication::Default(xgi::Input * in, xgi::Output * out ) throw (
 
 
 ///
-/*
+
 *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
 *out << cgicc::legend("Testing and have no Idea if this will work or not").set("style", "color:blue") ;
 *out << cgicc::form().set("method", "GET").set("action", "/" + urn + "/GenGEMPattxtFile" ) << endl;
@@ -516,7 +862,7 @@ string tempstring = "GemBx" + number;
 
 
 
-
+/*
 //unit 3 n
 *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
 *out << cgicc::legend("Converter Yuriy's style txt file to Cfeb Pat File").set("style", "color:blue") ;
@@ -637,12 +983,14 @@ for(int i=0; i<8; ++i){
 *out << cgicc::fieldset() << endl;
 
 // unit 8
+
 *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
 *out << cgicc::legend("Clear the Emulator Board").set("style", "color:blue") ;
 *out << cgicc::form().set("method", "GET").set("action", "/" + urn + "/ClearEmuBoard" ) << endl;
 *out << cgicc::input().set("type", "submit").set("value", "Clear Emulator Board").set("name", "Clear Emulator Board") << endl;
 *out << cgicc::form() << endl;
-*out << cgicc::fieldset() << endl;
+*/
+//*out << cgicc::fieldset() << endl;
 
 /*
 //unit 9
@@ -654,6 +1002,8 @@ for(int i=0; i<8; ++i){
 *out << cgicc::fieldset() << endl;
 */
 //
+
+/*
 cgicc::form_iterator name = cgi.getElement("tmb");
 int tmb;
 if(name != cgi.getElements().end()) {
@@ -664,13 +1014,13 @@ if(name != cgi.getElements().end()) {
   std::cout << "TMBStatus: No TMB" << std::endl ;
   tmb = TMB_;
 }
-//
+
 tmb = 1;
 TMB * thisTMB = tmbVector[tmb];
 std::cout << "the value for tmb is = " << tmb << std::endl;
 std::cout << "The tmbVector[tmb] = " << tmbVector[tmb] << std::endl;
 
-//
+
 *out << cgicc::fieldset();
 *out << cgicc::legend("CLCT Info").set("style","color:blue") << std::endl ;
 *out << cgicc::pre();
@@ -680,8 +1030,20 @@ thisTMB->PrintCLCT();
 thisTMB->RedirectOutput(&std::cout);
 *out << cgicc::pre();
 *out << cgicc::fieldset();
-//
+
+*/
+
 /*
+  stringstream ss;
+  thisTMB->RedirectOutput(&ss);
+  thisTMB->DecodeCLCT();
+  thisTMB->PrintCLCT();
+  thisTMB->RedirectOutput(&std::cout);
+  cout << ss.str() << endl;
+*/
+
+
+//
 if(thisTMB->GetHardwareVersion() >= 2) {
   *out << cgicc::fieldset();
   *out
@@ -689,23 +1051,462 @@ if(thisTMB->GetHardwareVersion() >= 2) {
     << std::endl;
   *out << cgicc::pre();
   thisTMB->RedirectOutput(out);
-  thisTMB->DecodeMPCFrames(); // Decode MPC frames for LAST trigger. VME registers: 0x88, 0x8a, 0x8c, 0x8e
-  thisTMB->PrintMPCFrames();  // Print  MPC frames for LAST trigger. VME registers: 0x88, 0x8a, 0x8c, 0x8e
-  //
-  thisTMB->DecodeMPCFramesFromFIFO(); // Decode MPC frames for ONE trigger from FIFO. VME registers: 0x17C, 0x17E, 0x180, 0x182
-  thisTMB->PrintMPCFramesFromFIFO();  // Print  MPC frames for ONE trigger from FIFO. VME registers: 0x17C, 0x17E, 0x180, 0x182
-  //
-  thisTMB->DecodeAndPrintMPCFrames(10); // Decode and print MPC frames for both cases:
+  //thisTMB->DecodeMPCFrames(); // Decode MPC frames for LAST trigger. VME registers: 0x88, 0x8a, 0x8c, 0x8e
+  //thisTMB->PrintMPCFrames();  // Print  MPC frames for LAST trigger. VME registers: 0x88, 0x8a, 0x8c, 0x8e
+  ////
+  //thisTMB->DecodeMPCFramesFromFIFO(); // Decode MPC frames for ONE trigger from FIFO. VME registers: 0x17C, 0x17E, 0x180, 0x182
+  //thisTMB->PrintMPCFramesFromFIFO();  // Print  MPC frames for ONE trigger from FIFO. VME registers: 0x17C, 0x17E, 0x180, 0x182
+  ////
+  thisTMB->DecodeAndPrintMPCFrames(0); // Decode and print MPC frames for both cases:
                     //   1. LAST trigger. VME registers: 0x88, 0x8a, 0x8c, 0x8e
                     //   2. ONE trigger from FIFO. VME registers: 0x17C, 0x17E, 0x180, 0x182
   thisTMB->RedirectOutput(&std::cout);
   *out << cgicc::pre();
   *out << cgicc::fieldset();
 }
-*/
 
   emu::utils::footer(out);
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//					Pattern Studies Functions (Jan. 2020)
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+void CSCGEMTestApplication::GetOTMBCompileType(xgi::Input * in, xgi::Output * out)
+{
+  using namespace std;
+
+  cgicc::Cgicc cgi(in);
+  if(xgi::Utils::hasFormElement(cgi,"GetOTMBType")) sprintf(GetOTMBType,cgi["GetOTMBType"]->getValue().c_str());
+  
+  GetOTMBType[0] = tolower(GetOTMBType[0]);
+
+  patternSet.SetOTMBCompileType(GetOTMBType[0]);
+
+
+  this->Default(in, out);
+  return; 
+
+}
+
+void CSCGEMTestApplication::AddComparatorHit(xgi::Input * in, xgi::Output * out)
+{ 
+  using namespace std;
+
+  cgicc::Cgicc cgi(in);
+
+  if(xgi::Utils::hasFormElement(cgi,"GetHit_muon1_layer0_char")) sprintf(GetHit_muon1_layer0_char,cgi["GetHit_muon1_layer0_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetHit_muon1_layer1_char")) sprintf(GetHit_muon1_layer1_char,cgi["GetHit_muon1_layer1_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetHit_muon1_layer2_char")) sprintf(GetHit_muon1_layer2_char,cgi["GetHit_muon1_layer2_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetHit_muon1_layer3_char")) sprintf(GetHit_muon1_layer3_char,cgi["GetHit_muon1_layer3_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetHit_muon1_layer4_char")) sprintf(GetHit_muon1_layer4_char,cgi["GetHit_muon1_layer4_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetHit_muon1_layer5_char")) sprintf(GetHit_muon1_layer5_char,cgi["GetHit_muon1_layer5_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetHit_muon1_bx_char")) sprintf(GetHit_muon1_bx_char,cgi["GetHit_muon1_bx_char"]->getValue().c_str());
+
+  if (GetHit_muon1_layer0_char[0] != '-') GetHit_muon1_layer0_int = atoi(GetHit_muon1_layer0_char);
+  if (GetHit_muon1_layer1_char[0] != '-') GetHit_muon1_layer1_int = atoi(GetHit_muon1_layer1_char);
+  if (GetHit_muon1_layer2_char[0] != '-') GetHit_muon1_layer2_int = atoi(GetHit_muon1_layer2_char);
+  if (GetHit_muon1_layer3_char[0] != '-') GetHit_muon1_layer3_int = atoi(GetHit_muon1_layer3_char);
+  if (GetHit_muon1_layer4_char[0] != '-') GetHit_muon1_layer4_int = atoi(GetHit_muon1_layer4_char);
+  if (GetHit_muon1_layer5_char[0] != '-') GetHit_muon1_layer5_int = atoi(GetHit_muon1_layer5_char);
+  if (GetHit_muon1_bx_char[0] != '-')  GetHit_muon1_bx_int = atoi(GetHit_muon1_bx_char);
+  else GetHit_muon1_bx_int = 6;
+
+  int tmbtype = 0xa+GetOTMBType[0]-'a';//get OTMB type, a,c,d->0xa, 0xc, 0xd
+  cout << "READ IN CFEB : OTMB type " << GetOTMBType[0] <<" int "<< tmbtype<< "\n";
+  cout << "Muon BX"<< GetHit_muon1_bx_int <<" hit(layer1->layer6): "<< GetHit_muon1_layer0_int 
+                                 <<" "<< GetHit_muon1_layer1_int 
+                                 <<" "<< GetHit_muon1_layer2_int 
+                                 <<" "<< GetHit_muon1_layer3_int 
+				 <<" "<< GetHit_muon1_layer4_int 
+                                 <<" "<< GetHit_muon1_layer5_int << endl;
+
+  if(GetHit_muon1_layer0_char[0] != '-') patternSet.AddComparatorHit(Hit(GetHit_muon1_bx_int, GetHit_muon1_layer0_int, 0, tmbtype));
+  if(GetHit_muon1_layer1_char[0] != '-') patternSet.AddComparatorHit(Hit(GetHit_muon1_bx_int, GetHit_muon1_layer1_int, 1, tmbtype));
+  if(GetHit_muon1_layer2_char[0] != '-') patternSet.AddComparatorHit(Hit(GetHit_muon1_bx_int, GetHit_muon1_layer2_int, 2, tmbtype));
+  if(GetHit_muon1_layer3_char[0] != '-') patternSet.AddComparatorHit(Hit(GetHit_muon1_bx_int, GetHit_muon1_layer3_int, 3, tmbtype));
+  if(GetHit_muon1_layer4_char[0] != '-') patternSet.AddComparatorHit(Hit(GetHit_muon1_bx_int, GetHit_muon1_layer4_int, 4, tmbtype));
+  if(GetHit_muon1_layer5_char[0] != '-') patternSet.AddComparatorHit(Hit(GetHit_muon1_bx_int, GetHit_muon1_layer5_int, 5, tmbtype));
+
+  this->Default(in, out);
+  return; 
+}
+
+
+void CSCGEMTestApplication::AddCLCT(xgi::Input * in, xgi::Output * out)
+{ 
+  using namespace std;
+
+  cgicc::Cgicc cgi(in);
+
+  if(xgi::Utils::hasFormElement(cgi,"GetCLCT_bx_char")) sprintf(GetCLCT_bx_char,cgi["GetCLCT_bx_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetCLCT_key_char")) sprintf(GetCLCT_key_char,cgi["GetCLCT_key_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetCLCT_pid_char")) sprintf(GetCLCT_pid_char,cgi["GetCLCT_pid_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetCLCT_nhit_char")) sprintf(GetCLCT_nhit_char,cgi["GetCLCT_nhit_char"]->getValue().c_str());
+
+  GetCLCT_bx_int = atoi(GetCLCT_bx_char);
+  GetCLCT_key_int = atoi(GetCLCT_key_char);
+  GetCLCT_pid_int = atoi(GetCLCT_pid_char);
+  GetCLCT_nhit_int = atoi(GetCLCT_nhit_char);
+  int tmbtype = 0xa+GetOTMBType[0]-'a';//get OTMB type, a,c,d->0xa, 0xc, 0xd
+
+  cout << "READ IN CFEB : \n";
+  cout << "Bx : " << GetCLCT_bx_int << endl;
+  cout << "Key : " << GetCLCT_key_int << endl;
+  cout << "PiD : " << GetCLCT_pid_int << endl;
+  cout << "N Hits : " << GetCLCT_nhit_int  << endl;
+  cout << "OTMB type : " << GetOTMBType[0]  << " int "<< tmbtype<< endl;
+  
+
+  patternSet.AddCLCT( CLCT(GetCLCT_bx_int, GetCLCT_key_int, GetCLCT_pid_int, GetCLCT_nhit_int, tmbtype) );
+
+  this->Default(in, out);
+  return; 
+}
+
+void CSCGEMTestApplication::AddGEM(xgi::Input * in, xgi::Output * out)
+{
+cgicc::Cgicc cgi(in);
+
+  if(xgi::Utils::hasFormElement(cgi,"GetGEM_bx_char")) sprintf(GetGEM_bx_char,cgi["GetGEM_bx_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetGEM_roll_char")) sprintf(GetGEM_roll_char,cgi["GetGEM_roll_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetGEM_pad_char")) sprintf(GetGEM_pad_char,cgi["GetGEM_pad_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetGEM_size_char")) sprintf(GetGEM_size_char,cgi["GetGEM_size_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetGEM_layer_char")) sprintf(GetGEM_layer_char,cgi["GetGEM_layer_char"]->getValue().c_str());
+
+  GetGEM_bx_int = atoi(GetGEM_bx_char);
+  GetGEM_roll_int = atoi(GetGEM_roll_char);
+  GetGEM_pad_int = atoi(GetGEM_pad_char);
+  GetGEM_size_int = atoi(GetGEM_size_char);
+  GetGEM_layer_int = atoi(GetGEM_layer_char);
+
+  cout << "READ IN GEM : \n";
+  cout << "Bx : " << GetGEM_bx_int << endl;
+  cout << "Roll : " << GetGEM_roll_int << endl;
+  cout << "Pad : " << GetGEM_pad_int << endl;
+  cout << "Size : " << GetGEM_size_int  << endl;
+  cout << "Layer : " << GetGEM_layer_int << endl;
+
+  patternSet.AddGEM( Cluster(GetGEM_bx_int, GetGEM_roll_int, GetGEM_pad_int, GetGEM_size_int, GetGEM_layer_int) );
+
+  this->Default(in, out); 
+  return; 
+}
+
+void CSCGEMTestApplication::SaveAsPat(xgi::Input * in, xgi::Output * out)
+{
+  using namespace std;
+  cgicc::Cgicc cgi(in);
+
+  if(xgi::Utils::hasFormElement(cgi,"GetSetPrefix")) sprintf(GetSetPrefix,cgi["GetSetPrefix"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetSaveDir")) sprintf(GetSaveDir,cgi["GetSaveDir"]->getValue().c_str());
+
+  patternSet.Prefix = GetSetPrefix;
+  patternSet.WritePatterns(GetSaveDir);
+  cout << "\n TRYING TO WRITE PATS \n";
+
+  cout << "Input prefix = " << GetSetPrefix << endl;
+  cout << "Save prefix = " << patternSet.Prefix << endl;
+  cout << "Save Dir = " << GetSaveDir << endl;
+
+  patternSet.Prefix = "default";	// return to default settings
+  this->Default(in, out);
+  return;
+}
+
+void CSCGEMTestApplication::SaveAsTxt(xgi::Input * in, xgi::Output * out)
+{
+  this->Default(in, out);
+  return;
+}
+
+
+void CSCGEMTestApplication::SaveCurrentSet(xgi::Input * in, xgi::Output * out)
+{
+  this->Default(in, out);
+  return;
+}
+
+void CSCGEMTestApplication::ClearEmuBoard(xgi::Input * in, xgi::Output * out)
+{
+    using namespace std;
+    cgicc::Cgicc cgi(in);
+    cw::Set emptySet;
+    if(emptySet.WritePatterns()){
+        if( emptySet.LoadEmuBoard() ){
+                cout << "Successfully Loaded to EmuBoard!\n";
+        }
+        else{
+                cout << "ERROR: FAILED TO LOAD EmuBoard!!!!!!!\n";
+        }
+    }
+    
+    patternSet.DeleteCurrentSet();
+
+    this->Default(in, out);
+    return;
+}
+
+void CSCGEMTestApplication::ClearSet(xgi::Input * in, xgi::Output * out)
+{
+  patternSet = cw::Set();
+  patternSet.DeleteCurrentSet();
+
+  sprintf(GetSetPrefix, patternSet.Prefix.c_str());
+  sprintf(GetSaveDir, cw::default_dir.c_str());
+
+  this->Default(in,out);
+  return;
+}
+
+
+void CSCGEMTestApplication::RunStudy(xgi::Input * in, xgi::Output * out)
+{
+  cgicc::Cgicc cgi(in);
+
+  if(xgi::Utils::hasFormElement(cgi,"GetNtrials_char")) sprintf(GetNtrials_char,cgi["GetNtrials_char"]->getValue().c_str());
+
+  int clct0_lsbs, clct1_lsbs, clct_msbs;
+  int CLCT0_data_, CLCT1_data_;
+  TMB * thisTMB = tmbVector[1];				/// THIS SHOULD BE EDITED IF USING DIFFERENT TMB SETTINGS !!!!!!!!
+
+  GetNtrials_int = atoi(GetNtrials_char);
+  patternSet.N_trials += GetNtrials_int;
+  for(int i=0; i < GetNtrials_int; i++){
+    patternSet.Dump();
+    clct0_lsbs = thisTMB->ReadRegister(seq_clct0_adr);
+    clct1_lsbs = thisTMB->ReadRegister(seq_clct1_adr);
+    clct_msbs  = thisTMB->ReadRegister(seq_clctm_adr);
+  
+    CLCT0_data_ = ( (clct_msbs & 0xf) << 16 ) | (clct0_lsbs & 0xffff);
+    CLCT1_data_ = ( (clct_msbs & 0xf) << 16 ) | (clct1_lsbs & 0xffff);
+    
+    int CLCT0_nhit = thisTMB->ExtractValueFromData(CLCT0_data_, CLCT0_nhit_bitlo, CLCT0_nhit_bithi);
+    int CLCT0_pid = thisTMB->ExtractValueFromData(CLCT0_data_, CLCT0_pattern_bitlo, CLCT0_pattern_bithi);
+    int CLCT0_key = thisTMB->ExtractValueFromData(CLCT0_data_, CLCT0_keyHalfStrip_bitlo, CLCT0_keyHalfStrip_bithi);
+    
+    std::cout << std::endl << "CLCT 0 Decode:" << std::endl;
+    std::cout << "N Hit = " << CLCT0_nhit << std::endl;
+    std::cout << "Pid   = " << CLCT0_pid << std::endl;
+    std::cout << "KeyStr= " << CLCT0_key << std::endl;
+
+    thisTMB->GetCounters();
+
+    int CLCT1_nhit = thisTMB->ExtractValueFromData(CLCT1_data_, CLCT1_nhit_bitlo, CLCT1_nhit_bithi);
+    int CLCT1_pid = thisTMB->ExtractValueFromData(CLCT1_data_, CLCT1_pattern_bitlo, CLCT1_pattern_bithi);
+    int CLCT1_key = thisTMB->ExtractValueFromData(CLCT1_data_, CLCT1_keyHalfStrip_bitlo, CLCT1_keyHalfStrip_bithi);
+
+    int clct0_inc = thisTMB->GetCounter(cw::tmb_counters[0]) - CLCT0_Counter;
+    int clct1_inc = thisTMB->GetCounter(cw::tmb_counters[1]) - CLCT1_Counter;
+
+    std::cout << "CLCT 1 Decode:" << std::endl;
+    std::cout << "N Hit = " << CLCT1_nhit << std::endl;
+    std::cout << "Pid   = " << CLCT1_pid << std::endl;
+    std::cout << "KeyStr= " << CLCT1_key << std::endl;
+
+    std::cout << "Increment on CLCT0 = " << clct0_inc << "    " << CLCT0_Counter << "   " << thisTMB->GetCounter(cw::tmb_counters[0]) << std::endl;
+    std::cout << "Increment on CLCT1 = " << clct1_inc << "    " << CLCT1_Counter << "   " << thisTMB->GetCounter(cw::tmb_counters[1]) << std::endl;
+
+    CLCT0_Counter = thisTMB->GetCounter(cw::tmb_counters[0]);//thisTMB->GetCounter(cw::tmb_counters[0]);
+    CLCT1_Counter = thisTMB->GetCounter(cw::tmb_counters[1]);//thisTMB->GetCounter(cw::tmb_counters[1]);
+
+
+    //cw::TMBresponse thisTrial = cw::TMBresponse(CLCT0_data_, CLCT1_data_, 0);
+    cw::TMBresponse_long thisTrial = cw::TMBresponse_long(CLCT0_nhit, CLCT0_pid, CLCT0_key, CLCT1_nhit, CLCT1_pid, CLCT1_key, clct0_inc, clct1_inc);
+    bool match = false;
+    for(unsigned int i=0; i < patternSet.Results_l.size(); i++){
+      if(thisTrial == patternSet.Results_l[i]){
+         ++patternSet.Results_l[i];
+	 match = true;
+         break;
+      }
+    }
+    if(!match){ patternSet.Results_l.push_back(thisTrial); }
+    
+    //thisTMB->ResetCounters();
+  }
+
+  std::cout << "Took this many TMB Dumps: " << GetNtrials_int << std::endl;
+	
+  this->Default(in,out);
+  return;
+}
+
+void CSCGEMTestApplication::AddCLCTParamScan(xgi::Input * in, xgi::Output * out)
+{
+  cgicc::Cgicc cgi(in);
+
+  if(xgi::Utils::hasFormElement(cgi,"GetCLCT_bx_ps_char")) sprintf(GetCLCT_bx_ps_char,cgi["GetCLCT_bx_ps_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetCLCT_key_ps_char")) sprintf(GetCLCT_key_ps_char,cgi["GetCLCT_key_ps_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetCLCT_pid_ps_char")) sprintf(GetCLCT_pid_ps_char,cgi["GetCLCT_pid_ps_char"]->getValue().c_str());
+  if(xgi::Utils::hasFormElement(cgi,"GetCLCT_nhit_ps_char")) sprintf(GetCLCT_nhit_ps_char,cgi["GetCLCT_nhit_ps_char"]->getValue().c_str());
+
+  GetCLCT_ps_char[0] = GetCLCT_bx_ps_char;
+  GetCLCT_ps_char[1] = GetCLCT_key_ps_char;
+  GetCLCT_ps_char[2] = GetCLCT_pid_ps_char;
+  GetCLCT_ps_char[3] = GetCLCT_nhit_ps_char;
+
+  std::vector<int> ps_clct_info;
+
+  for(unsigned int i=0; i < GetCLCT_ps_char.size(); i++){
+    std::istringstream ss;
+    ss.str(GetCLCT_ps_char[i]);
+
+    cw::RangeParam range;
+    range.param = i;
+    range.clct = CLCT_ps_vec.size();
+    range.step_size = 1;
+
+    if(ss.str().empty()){ 
+        cout << "empty" << endl;
+        ps_clct_info.push_back(0);
+    }
+    else if(ss.str().at(0) == '['){  
+      cout << "We are reading a RANGED VALUE:"<<ss.str() << endl << endl; 
+      int a,b;
+      char tmp;
+      ss >> tmp >> a >> tmp >> b >> tmp;
+      cout << "These are the vals a= " << a << " b= " << b << endl << endl;
+      if(a < b){
+        range.min = a;
+        range.max = b;
+      }
+      else{
+        range.min = b;
+        range.max = a;
+      }
+      Free_params.push_back(range);
+      ps_clct_info.push_back(a);
+    }
+    else{
+      cout << "We are reading a SINGLE VALUE:" << ss.str() << endl << endl;
+      int a;
+      ss >> a;
+      ps_clct_info.push_back(a);
+      cout << "The Value is a = " << a << endl << endl;
+    }
+  }
+
+  int tmbtype = GetOTMBType[0] +0xa -'a';//get OTMB type, a,c,d->0xa, 0xc, 0xd
+  CLCT_ps_vec.push_back(cw::CLCT(ps_clct_info[0],ps_clct_info[1],ps_clct_info[2],ps_clct_info[3], tmbtype));
+
+  this->Default(in,out);
+  return;
+}
+
+void CSCGEMTestApplication::DOESWORK(xgi::Input * in, xgi::Output * out)
+{
+ this->Default(in,out);
+ return;
+}
+
+void CSCGEMTestApplication::RunParamScan(xgi::Input * in, xgi::Output * out)
+{
+  std::cout << "\nRUNNING PARAM SCAN\n";
+  cgicc::Cgicc cgi(in);
+
+  // Read input fields
+  if(xgi::Utils::hasFormElement(cgi,"TrialsPerStep_char")){
+    sprintf(TrialsPerStep_char,cgi["TrialsPerStep_char"]->getValue().c_str());
+    TrialsPerStep = atoi(TrialsPerStep_char);
+  }
+  else{ TrialsPerStep = 1; }
+  if(xgi::Utils::hasFormElement(cgi,"ParamScanOutFile")) sprintf(ParamScanOutFile,cgi["ParamScanOutFile"]->getValue().c_str());
+
+  patternSet.N_trials = TrialsPerStep;
+
+  // Open the Output File
+  std::fstream fout;
+  fout.open(ParamScanOutFile, std::fstream::out | std::fstream::app);
+
+  int clct0_lsbs, clct1_lsbs, clct_msbs;
+  int clct0_inc=0; 
+  int clct1_inc=0;
+  int CLCT0_data_, CLCT1_data_;
+  TMB * thisTMB = tmbVector[1];                         /// THIS SHOULD BE EDITED IF USING DIFFERENT TMB SETTINGS !!!!!!!!
+
+  do{	
+	// Reset Counting Variables!@!
+	thisTMB->ResetCounters();
+	clct0_inc = 0;
+	clct1_inc = 0;
+	CLCT0_Counter = 0;
+	CLCT1_Counter = 0;	
+
+	// Load CLCT_ps_vec to current patternSet
+	patternSet.Clear();
+	for(unsigned int i=0; i < CLCT_ps_vec.size(); i++){
+		patternSet.CSC.push_back(CLCT_ps_vec[i]);
+	}
+	// Generate {.pat} in tmp file location and Load to Emu Board
+	patternSet.DeleteCurrentSet();
+	patternSet.SetOTMBCompileType(GetOTMBType[0]);
+   	if(patternSet.WritePatterns()){
+        	if( patternSet.LoadEmuBoard() ){
+       	 	        cout << "Successfully Loaded to EmuBoard!\n";
+        	}
+        	else{
+        	        cout << "ERROR: FAILED TO LOAD EmuBoard!!!!!!!\n";
+        	}
+	}
+
+	// For( TrialsPerStep ) ->Dump to EmuBoard,
+	// 			->Record TMB Response
+	for(int i=0; i < patternSet.N_trials; i++){
+		patternSet.Dump();
+    		clct0_lsbs = thisTMB->ReadRegister(seq_clct0_adr);
+    		clct1_lsbs = thisTMB->ReadRegister(seq_clct1_adr);
+    		clct_msbs  = thisTMB->ReadRegister(seq_clctm_adr);
+
+		thisTMB->GetCounters();
+
+		clct0_inc = thisTMB->GetCounter(cw::tmb_counters[0]) - CLCT0_Counter;
+                clct1_inc = thisTMB->GetCounter(cw::tmb_counters[1]) - CLCT1_Counter;
+
+		cout << endl << CLCT0_Counter << "  " << thisTMB->GetCounter(cw::tmb_counters[0]) << endl;
+		cout << endl << CLCT1_Counter << "  " << thisTMB->GetCounter(cw::tmb_counters[1]) << endl;
+
+		CLCT0_Counter = thisTMB->GetCounter(cw::tmb_counters[0]);
+		CLCT1_Counter = thisTMB->GetCounter(cw::tmb_counters[1]);
+		
+    		CLCT0_data_ = ( (clct_msbs & 0xf) << 16 ) | (clct0_lsbs & 0xffff);
+    		CLCT1_data_ = ( (clct_msbs & 0xf) << 16 ) | (clct1_lsbs & 0xffff);
+		
+		cw::TMBresponse thisTrial = cw::TMBresponse(CLCT0_data_, CLCT1_data_, clct0_inc, clct1_inc);
+		//cw::TMBresponse_long thisTrial = cw::TMBresponse_long(CLCT0_nhit, CLCT0_pid, CLCT0_key, CLCT1_nhit, CLCT1_pid, CLCT1_key, clct0_inc, clct1_inc);
+		bool match = false;
+		for(unsigned int i=0; i < patternSet.Results.size(); i++){
+			if(thisTrial == patternSet.Results[i]){
+		        	++patternSet.Results[i];
+		                match = true;
+		                break;
+		   	}
+                }
+		if(!match){ patternSet.Results.push_back(thisTrial); }
+		
+	}
+
+	fout << patternSet << endl;	// Write Results to file
+
+	// DEBUG
+	for(unsigned int i=0; i < CLCT_ps_vec.size(); i++){
+		cout << "CLCT" << i << " " << CLCT_ps_vec[i] << endl;
+	}
+	
+  }while(Increment(CLCT_ps_vec, Free_params));
+
+  fout.close();
+  this->Default(in,out);
+  return;
+} 
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CSCGEMTestApplication::GenerateDCFEBData(xgi::Input * in, xgi::Output * out )
 {
@@ -931,8 +1732,8 @@ void CSCGEMTestApplication::YuriyPatConvert(xgi::Input * in, xgi::Output * out )
   strcat(filename,YuriyConvtxtFile);
   std::cout << "this is the location of the GEM txt file " << filename << endl;
   std::cout << "this is the location of the GEM Pat Dir " << DirYuriyConvtxt << endl;
-  PatternConvert PatConv;
-  PatConv.Pattern_Converter(filename);
+//  PatternConvert PatConv;
+//  PatConv.Pattern_Converter(filename);
   std::cout << "the pattern file has been created." << std::endl;
 
   this->Default(in, out);
@@ -957,9 +1758,9 @@ void CSCGEMTestApplication::Yuriy_CLCT_PatternConverter(xgi::Input * in, xgi::Ou
   std::cout << "this is the location of the Yuriy CLCT txt file " << filename << endl;
   std::cout << "this is the location of the Yuriy CLCT Pat Dir " << DirYuriyCLCTConvPat << endl;
 
-  Yuriy_CLCT_PatternGen YuriyCLCTPat;
+//  Yuriy_CLCT_PatternGen YuriyCLCTPat;
   std::cout << "at least it will create the object \n";
-  YuriyCLCTPat.Yuriy_CLCT_PatternGenerator(filename,DirYuriyCLCTConvPat);
+//  YuriyCLCTPat.Yuriy_CLCT_PatternGenerator(filename,DirYuriyCLCTConvPat);
   std::cout << "the Yuriy CLCT Patter has been created." << std::endl;
 
   this->Default(in, out);
@@ -983,8 +1784,8 @@ void CSCGEMTestApplication::GemPatternConverter(xgi::Input * in, xgi::Output * o
 	std::cout << "this is the location of the GEM txt file " << filename << endl;
 	std::cout << "this is the location of the GEM Pat Dir " << DirGEMPat << endl;
 
-    GEMPatternGen GemPat;
-    GemPat.GEMPatternGenerator(filename,DirGEMPat);
+//    GEMPatternGen GemPat;
+//    GemPat.GEMPatternGenerator(filename,DirGEMPat);
     std::cout << "at least it works up to here TrolololOLOLOLOOlol9oLOLoLOlol \n";
 
     std::cout << "the GEM Patter has been created." << std::endl;
@@ -1016,9 +1817,9 @@ void CSCGEMTestApplication::CfebPatternConverter(xgi::Input * in, xgi::Output * 
   std::cout << "this is the location of the Cfeb txt file " << filename << endl;
   std::cout << "this is the location of the Cfeb Pat Dir " << DirGEMPat << endl;
 
-  PatternGen CfebPat;
+  //PatternGen CfebPat;
   std::cout << "at least it will create the object \n";
-  CfebPat.PatternGenerator(filename,DirCfebPat);
+  //CfebPat.PatternGenerator(filename,DirCfebPat);
   std::cout << "the Cfeb Patter has been created." << std::endl;
 
   this->Default(in, out);
@@ -1029,79 +1830,23 @@ void CSCGEMTestApplication::LoadToEmuBoard(xgi::Input * in, xgi::Output * out )
     using namespace std;
     cgicc::Cgicc cgi(in);
 
-   	if(xgi::Utils::hasFormElement(cgi, "DirGen")) sprintf(DirGen,cgi["DirGen"]->getValue().c_str());
-  	if(xgi::Utils::hasFormElement(cgi, "PatFile")) sprintf(PatFile,cgi["PatFile"]->getValue().c_str());
-   	if(xgi::Utils::hasFormElement(cgi, "FiberN")) sprintf(FiberN,cgi["FiberN"]->getValue().c_str());
-   	if(xgi::Utils::hasFormElement(cgi, "NumRuns")) sprintf(NumRuns,cgi["NumRuns"]->getValue().c_str());
+    patternSet.DeleteCurrentSet();
+    patternSet.SetOTMBCompileType(GetOTMBType[0]);
 
-	char filename[400];
-
-	 strcpy(filename,DirGen);
-	 strcat(filename,"/");
-	 strcat(filename,PatFile);
-
-	std::cout << "this is the location of the file " << filename << endl;
-	std::cout << "this is the fiber number " << FiberN << endl;
-
-
-
-	int pageid = atoi(FiberN);
-    sprintf(FileNameFiberN[pageid],filename);
-	std::cout << "this is the fiber number " << pageid << endl;
-	char block[RAMPAGE_SIZE];
-	char block_back[RAMPAGE_SIZE];
-
-	FILE* infile = fopen(filename,"r");
-
-
-	fread(block, sizeof(char), RAMPAGE_SIZE, infile);
-
-	memcpy(wdat,block,RAMPAGE_SIZE);
-
-	eth_open(EmuBoardLocation);
-
-	eth_reset();
-
-	int e = write_command(7,pageid, block);
-
-	eth_close();
-
-	usleep(200);
-	eth_open(EmuBoardLocation);
-    eth_reset();
-
-    int q = write_command(3, pageid);
-	cout << "write command 3 status = " << q << endl;
-    char* pkt;
-    int p = read_command(&pkt);
-	cout << "read command status = " << p << endl;
-    memcpy(block_back, (const void*)&pkt[4], RAMPAGE_SIZE);
-
-	eth_close();
-
-
-
-	PatLoadError = false;
-	for(int i = 0; i < RAMPAGE_SIZE; ++i)
-    {
-      if(block[i]!=block_back[i])
-        PatLoadError = true;
+    if(patternSet.WritePatterns()){
+	if( patternSet.LoadEmuBoard() ){
+		cout << "Successfully Loaded to EmuBoard!\n";
+	}
+	else{
+		cout << "ERROR: FAILED TO LOAD EmuBoard!!!!!!!\n";
+	}
     }
 
-	cout << "this is the start of the first hexdump : " << endl;
-	dumphex(RAMPAGE_SIZE,block);
-	cout << endl;
-	cout << "this is the start of the second hexdump : " << endl;
-	dumphex(RAMPAGE_SIZE,block_back);
-	cout << endl;
-	//eth_open(EmuBoardLocation);
 
-	//e = write_command(0xd);
-
-	//cout << "this is the tmbVector size ";
-	//cout << tmbVector.size() << endl;
-	FileLoadedToBoard = true;
-
+  TMB * thisTMB = tmbVector[1];
+  thisTMB->ResetCounters();
+  CLCT0_Counter = 0;
+  CLCT1_Counter = 0;
   this->Default(in, out);
 
 
@@ -1143,7 +1888,7 @@ void CSCGEMTestApplication::SendFromEmuBoard(xgi::Input * in, xgi::Output * out 
 
   this->Default(in, out);
 }
-
+/*
 void CSCGEMTestApplication::ClearEmuBoard(xgi::Input * in, xgi::Output * out )
 {
 	cgicc::Cgicc cgi(in);
@@ -1177,7 +1922,7 @@ void CSCGEMTestApplication::ClearEmuBoard(xgi::Input * in, xgi::Output * out )
 
   this->Default(in, out);
 }
-
+*/
 void CSCGEMTestApplication::OutputCLCTInfo(xgi::Input * in, xgi::Output * out )
 {
 /*

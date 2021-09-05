@@ -1,6 +1,7 @@
 
 #include "emu/pc/PatternGen.h"
 //#include <emu/pc/CSCConstants.h>
+//#include "emu/pc/CLCT.h" // added by Ben for COMPILE_TYPE constant, 6/30/20
 
 //#include <random>
 #include <cstdlib>
@@ -179,22 +180,32 @@ bool PatternGen::hits_Generation(int strip, int pattern, int Nhits, unsigned int
 
 void  PatternGen::triad_Generation( unsigned int (&triads)[CSCConstants::NUM_DCFEBS][3][CSCConstants::NUM_LAYERS], int strip, int pattern, int Nhits , int tmb_compile_type){
 
+   // function replaced by Tao's function
+   bool stagger = (tmb_compile_type == 0xa || tmb_compile_type == 0xb);
+   bool reverselayers = (tmb_compile_type == 0xb);
    unsigned int hits[6] = {999, 999, 999, 999, 999, 999};
 //unsigned int triads[CSCConstants::NUM_DCFEBS][3][CSCConstants::NUM_LAYERS] = {0};
    hits_Generation(strip, pattern, Nhits, hits);
    for (int j=0; j < CSCConstants::NUM_LAYERS; j++){
         if (hits[j] == 999) continue;//default is 0
-        int dcfeb = GetInputCFEBByX<32>(hits[j], tmb_compile_type);
-        int localhs = GetInputXStrip<32>(hits[j], tmb_compile_type);
+        int hit_hs = hits[j];
+        int l = j; // layer
+        if (reverselayers) l = CSCConstants::NUM_LAYERS-1-j; // reverse layer for type B
+
+        //if (stagger and l%2==1)  hit_hs = hit_hs+1; // add CSC staggering for type A and type B 
+        if (tmb_compile_type == 0xa  and l%2==1)  hit_hs = hit_hs+1; // add CSC staggering for type A and type B 
+        else if (tmb_compile_type == 0xb and l%2==0) hit_hs = hit_hs+1;
+        int dcfeb = GetInputCFEBByX<32>(hit_hs, tmb_compile_type);
+        int localhs = GetInputXStrip<32>(hit_hs, tmb_compile_type);
         int distrip = localhs/4;
         unsigned int n = 1 << (distrip);
         bool leftstrip = (localhs%4 < 2);//? triad rules for different dcfeb
         bool lefths = ((localhs%4)%2 == 0);
-        triads[dcfeb][0][j] = n;
-        triads[dcfeb][1][j] = leftstrip? 0 : n;
-        triads[dcfeb][2][j] = lefths? 0 : n;
-        std::cout <<" layer " << j <<"  dcfeb " << dcfeb << " hs "<< hits[j] <<"  localhs " << localhs << " distrip " << distrip 
-            << " 1st " << (std::bitset<8>)n << " 2nd " <<(std::bitset<8>)triads[dcfeb][1][j] << " 3rd " << (std::bitset<8>)triads[dcfeb][2][j] <<std::endl;     
+        triads[dcfeb][0][l] = n;
+        triads[dcfeb][1][l] = leftstrip? 0 : n;
+        triads[dcfeb][2][l] = lefths? 0 : n;
+        std::cout <<" init layer " << j <<" real layer "<<l <<"  dcfeb " << dcfeb << " hs "<< hit_hs <<"  localhs " << localhs << " distrip " << distrip 
+<< " 1st " << (std::bitset<8>)n << " 2nd " <<(std::bitset<8>)triads[dcfeb][1][j] << " 3rd " << (std::bitset<8>)triads[dcfeb][2][j] <<std::endl;    
   }
    std::cout << std::endl; 
 }
@@ -284,7 +295,7 @@ void PatternGen::PatternGenerator(char * textfile, char * patfiledir) {
     unsigned int input_pattern = 0;
     unsigned int input_nhits =0;
     unsigned int input_bx =0;
-    unsigned int tmb_compile_type = 0xc;
+    unsigned int tmb_compile_type = 0xd; // Changed by Ben from 0xc to 0xa on 06/30/20
     std::vector<CLCT> clcts;
     std::fstream text_file(textfile, std::ios_base::in);
     /*if(argc > 1)

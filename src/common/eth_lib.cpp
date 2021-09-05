@@ -5,6 +5,7 @@ static int fd_schar;
 
 //// global variables ////
 int  eth_open(const char *dev_name);
+int  eth_open_device();
 int  eth_register_mac();
 void eth_close();
 int  eth_reset();
@@ -38,7 +39,7 @@ int nrdat;                 /* number of data bytes read */
 **********************************************************************/
 
 
-int eth_open(char *dev_name)
+int eth_open(const char *dev_name)
 {
   if(DEBUG>10) std::cout<<"DEBUG[eth_lib.cpp]  eth_open(\""<<dev_name<<"\")"<<std::endl;
   //fd_schar = open(dev_name, O_RDWR); // I think all file descriptors for a given device point to the same place so the exact fd doesn't matter much
@@ -49,6 +50,12 @@ int eth_open(char *dev_name)
   }
   //printf("Opened network path on device %s\n",dev_name);
   return 0;
+}
+
+int eth_open_device()
+{
+  const char* dev_schar = "/dev/schar3";
+  return eth_open(dev_schar);
 }
 
 int eth_register_mac()
@@ -91,11 +98,11 @@ int eth_read(int suppression)
     }
   } while(suppression>1 && nrdat>6 && (rpkt[0]&1)==1); //ignore multicast packets (ignores packet with first byte that is odd)
 
-  //if(DEBUG>20){
+  if(DEBUG>20){
     std::cout<<"DEBUG[eth_lib.cpp]  eth_read read packet of "<<nrdat<<" bytes:"<<std::endl;
     dumphex(nrdat,rdat);
     std::cout<<std::endl;
-  //}
+  }
   return nrdat;
 }
 
@@ -108,11 +115,11 @@ int eth_write()
   }
   int n_written;
   //printf(" Creating the packet... nwdat %d ...",nwdat);
-  //if(DEBUG>20){
+  if(DEBUG>20){
     std::cout<<"DEBUG[eth_lib.cpp]  eth_write sending packet of "<<nwdat<<" bytes:"<<std::endl;
     dumphex(nwdat,wdat);
     std::cout<<std::endl;
-  //}
+  }
   n_written = write(fd_schar, (const void *)wpkt, nwdat);
   //printf(" n_written %d \n",n_written);
   return n_written;

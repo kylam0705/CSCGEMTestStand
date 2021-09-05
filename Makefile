@@ -27,7 +27,10 @@ Sources=\
 	commands.cpp \
 	eth_lib.cpp \
 	utils.cpp \
-	GEMPatternGen.cc \
+	CLCT.cc \
+	CSCConstants.cpp \
+	Set.cpp \
+#	GEMPatternGen.cc \
 	PatternGen.cc \
 	pattern_convert.cc \
 	Yuriy_CLCT_PatternGen.cc
@@ -35,6 +38,7 @@ Sources=\
 IncludeDirs = \
 	$(XDAQ_ROOT)/include \
 	$(BUILD_HOME)/emu/emuDCS/CSCGEMTestStand/include \
+	$(BUILD_HOME)/emu/emuDCS/CSCGEMTestStand/include/emu/pc \
 	$(BUILD_HOME)/emu/emuDCS/OnlineDB/include \
 	$(BUILD_HOME)/emu/base/include \
 	$(BUILD_HOME)/emu/soap/include \
