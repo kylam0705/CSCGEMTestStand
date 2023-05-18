@@ -1,0 +1,19 @@
+In Makefile.fallbacks: guessing/checking values
+XDAQ_ROOT="/opt/xdaq"
+XDAQ_OS already set to "linux"
+XDAQ_PLATFORM already set to "x86_64_cc7"
+Guessed undefined XDAQ_PLATFORM to "x86_64_cc7"
+Calling make all in directory /home/cscdev/Ben/EMULIB_V14_GEM/emu/emuDCS/CSCGEMTestStand/.loop using install
+make -C /home/cscdev/Ben/EMULIB_V14_GEM/emu/emuDCS/CSCGEMTestStand/ -f Makefile _installall
+In Makefile.fallbacks: guessing/checking values
+XDAQ_ROOT="/opt/xdaq"
+XDAQ_OS already set to "linux"
+XDAQ_PLATFORM already set to "x86_64_cc7"
+Guessed undefined XDAQ_PLATFORM to "x86_64_cc7"
+make[1]: Entering directory `/home/cscdev/Ben/EMULIB_V14_GEM/emu/emuDCS/CSCGEMTestStand'
+Build done.
+install -d /home/cscdev/Ben/EMULIB_V14_GEM/x86_64_cc7/lib /home/cscdev/Ben/EMULIB_V14_GEM/x86_64_cc7/bin /home/cscdev/Ben/EMULIB_V14_GEM/x86_64_cc7/include /home/cscdev/Ben/EMULIB_V14_GEM/x86_64_cc7/htdocs
+cd include; find ./ \( -name "*.[hi]" -o -name "*.hpp" -o -name "*.hh" -o -name "*.hxx" \) -exec install -p -D {} /home/cscdev/Ben/EMULIB_V14_GEM/x86_64_cc7/include/{} \;
+Installing dynamic library.
+cp -pd -p /home/cscdev/Ben/EMULIB_V14_GEM/emu/emuDCS/CSCGEMTestStand/lib/linux/x86_64_cc7/libEmuCSCGEMTestStand.so* /home/cscdev/Ben/EMULIB_V14_GEM/x86_64_cc7/lib/
+make[1]: Leaving directory `/home/cscdev/Ben/EMULIB_V14_GEM/emu/emuDCS/CSCGEMTestStand'

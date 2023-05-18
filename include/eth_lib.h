@@ -6,12 +6,12 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <arpa/inet.h> 
-#include <netinet/if_ether.h> 
-#include <netinet/in.h> 
-#include <netinet/ip.h> 
-#include <net/if.h> 
-#include <sys/ioctl.h> 
+#include <arpa/inet.h>
+#include <netinet/if_ether.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
 #include <netpacket/packet.h>
 #include <errno.h>
 #include <string.h>
@@ -43,9 +43,9 @@ int eth_register_mac();
 
 int eth_reset(void);
 
-int eth_read(int suppression);
+int eth_read(int suppression, int Mute = 0);
 
-int eth_write();
+int eth_write(int Mute = 0);
 
 void eth_close(void);
 
