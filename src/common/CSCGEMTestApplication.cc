@@ -655,18 +655,15 @@ namespace emu {  namespace pc {
 
     //End of function
 
-
-    // Towsifa added function
-    *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
+    *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFDDBB") << endl;
     *out << cgicc::legend("Define Pattern Set").set("style", "color:blue") ;
-    *out << cgicc::br() << endl;
-    *out << "CFEB CLCT" << endl;
-    *out << cgicc::form().set("method", "GET").set("action","/" + urn + "/AddCLCT") << endl;
-    *out << "Bx : " << cgicc::input().set("type","text").set("name","GetCLCT_bx_char").set("size","7").set("value", GetCLCT_bx_char) << endl;
-    *out << " Key HalfStrip : " << cgicc::input().set("type","text").set("name","GetCLCT_key_char").set("size","7").set("value", GetCLCT_key_char) << endl;
-    *out << " PiD : " << cgicc::input().set("type","text").set("name","GetCLCT_pid_char").set("size","7").set("value", GetCLCT_pid_char) << endl;
-    *out << " N Hits : " << cgicc::input().set("type","text").set("name","GetCLCT_nhit_char").set("size","7").set("value", GetCLCT_nhit_char) << endl;
-    *out << cgicc::input().set("type","submit").set("value","Add").set("name", "Add CLCT") << endl;
+    *out << "CFEB CCLUT" << endl;
+    *out << cgicc::form().set("method", "GET").set("action","/" + urn + "/AddCCLUT") << endl;
+    *out << "Bx : " << cgicc::input().set("type","text").set("name","GetCCLUT_bx_char").set("size","7").set("value", GetCCLUT_bx_char) << endl;
+    *out << " Key HalfStrip : " << cgicc::input().set("type","text").set("name","GetCCLUT_key_char").set("size","7").set("value", GetCCLUT_key_char) << endl;
+    *out << " PiD : " << cgicc::input().set("type","text").set("name","GetCCLUT_pid_char").set("size","7").set("value", GetCCLUT_pid_char) << endl;
+    *out << " CCLUT Code : " << cgicc::input().set("type","text").set("name","GetCCLUT_ccode_char").set("size","7").set("value", GetCCLUT_ccode_char) << endl;
+    *out << cgicc::input().set("type","submit").set("value","Add").set("name", "Add CCLUT") << endl;
     *out << cgicc::form() << endl;
     *out << cgicc::br() << endl;
     *out << "halfstrip of Comparator Hits (- means no hit)" << endl;
@@ -702,167 +699,6 @@ namespace emu {  namespace pc {
     *out << cgicc::form() << endl;
     *out << cgicc::fieldset() << endl;
 
-
-    *out << cgicc::fieldset().set("style", "background-color:#FFFFBB; font-size: 11pt") << endl;
-    *out << cgicc::legend("Current Pattern Set").set("style","color:blue; font-size: 14pt") << endl;
-    *out << cgicc::pre();
-    *out <<"OTMB type "<< GetOTMBType[0] << " CSC: " << endl;
-    *out << "bx    keystrip    pattern    nhits   type   \t{ (bx,hs,layer, type) }" << endl;
-    for(unsigned int i=0; i < patternSet.CSC.size(); i++){
-      *out << patternSet.CSC[i] << endl;
-    }
-    *out << cgicc::br() << endl;
-    *out << "OTMB type "<< GetOTMBType[0] << " Comparato hits: " << endl;
-    *out << "bx hs layer type\t{ (bx,hs,layer,type) }" << endl;
-    for(unsigned int i=0; i < patternSet.ComparatorHit.size(); i++){
-      *out << patternSet.ComparatorHit[i] << endl;
-    }
-    *out << cgicc::br() << endl;
-    *out << "GEM: " << endl;
-    *out << "bx\troll\tpad\tsize\tlayer\trealVfatID" << endl;
-    for(unsigned int i=0; i < patternSet.GEM.size(); i++){
-      unsigned int clusterbits = patternSet.GEM[i].info();
-      *out << patternSet.GEM[i] <<" \t "<< std::bitset<14>(clusterbits)<< endl;
-    }
-    *out << cgicc::pre();
-    *out << cgicc::br() << endl;
-    *out << cgicc::form().set("method", "GET").set("action","/" + urn + "/LoadToEmuBoard") << endl;
-    *out << cgicc::input().set("type","submit").set("value","Load EmuBoard").set("name", "LoadToEmuBoard") << endl;
-    *out << cgicc::form() << endl;
-    *out << cgicc::fieldset();
-
-    *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
-    *out << cgicc::legend("Save Current Set").set("style", "color:blue; font-size: 14pt") << endl;
-    *out << "Prefix : " << endl;
-    *out << cgicc::form().set("method", "GET").set("action", "/" + urn + "/SaveAsPat") << endl;
-    *out << cgicc::input().set("type","text").set("name","GetSetPrefix").set("size","24").set("value",GetSetPrefix) << endl;
-    *out << cgicc::br() << endl;
-    *out << cgicc::br() << endl;
-    *out << "Save Directory : " << endl;
-    *out << cgicc::input().set("type","text").set("name","GetSaveDir").set("size","110").set("value",GetSaveDir) << endl;
-    *out << cgicc::br() << endl;
-    *out << cgicc::br() << endl;
-    *out << cgicc::form() << endl;
-    *out << cgicc::table().set("border","0") << endl;
-    *out << cgicc::td().set("ALIGN", "left") << endl;
-    *out << cgicc::form().set("method", "GET").set("action","/" + urn + "/SaveAsPat") << endl;
-    *out << cgicc::input().set("type", "submit").set("value","Save as {.pat}").set("name", "SaveAsPat") << endl;
-    *out << cgicc::form() << endl;
-    *out << cgicc::td() << endl;
-    *out << cgicc::td().set("ALIGN", "left") << endl;
-    *out << cgicc::form().set("method", "GET").set("action", "/" + urn + "/SaveAsTxt") << endl;
-    *out << cgicc::input().set("type", "submit").set("value","Save as (.txt)").set("name", "SaveAsTxt") << endl;
-    *out << cgicc::form() << endl;
-    *out << cgicc::td() << endl;
-    *out << cgicc::table() << endl;
-    *out << cgicc::fieldset();
-
-    *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
-    *out << cgicc::legend("Study Pattern Set").set("style", "color:blue; font-size: 14pt") << endl;
-    *out << cgicc::form().set("method", "GET").set("action", "/" + urn + "/RunStudy" ) << endl;
-    *out << "Number of Trials : " << endl;
-    *out << cgicc::input().set("type","text").set("name","GetNtrials_char").set("size","10").set("value",GetNtrials_char) << endl;
-    *out << cgicc::input().set("type", "submit").set("value", "Run").set("name", "Run Study") << endl;
-    *out << cgicc::form() << endl;
-    *out << cgicc::br() << endl;
-    *out << cgicc::pre();
-    thisTMB->RedirectOutput(out);
-    thisTMB->GetCounters();
-    cout << "TMB Counter # 29 = " << thisTMB->GetCounter(29) << endl;
-    cout << "TMB Counter # 30 = " << thisTMB->GetCounter(30) << endl;
-
-    thisTMB->PrintCounters(29);
-    *out << endl;
-    thisTMB->PrintCounters(30);
-    thisTMB->RedirectOutput(&std::cout);
-    *out << cgicc::pre();
-    *out << cgicc::br() << endl;
-    *out << cgicc::pre();
-    *out << "Statistics : " << endl;
-    *out << "# Trials = " << patternSet.N_trials << endl;
-    for(unsigned int i=0; i < patternSet.Results_l.size(); i++){
-      *out << patternSet.Results_l[i] << endl;
-    }
-    *out << cgicc::pre();
-    *out << cgicc::fieldset();
-
-
-    *out << cgicc::fieldset();
-
-      *out << cgicc::form().set("method","GET") << std::endl ;
-      *out << cgicc::pre();
-      *out << cgicc::textarea().set("name","CrateTestTMBOutput")
-        .set("rows","50")
-        .set("cols","150")
-        .set("WRAP","OFF");
-      *out << OutputStringTMBStatus[tmb].str() << std::endl ;
-      *out << cgicc::textarea();
-      OutputStringTMBStatus[tmb].str("");
-      *out << cgicc::pre();
-      *out << cgicc::form() << std::endl ;
-
-
-    *out << cgicc::legend("CLCT Info").set("style","color:blue") << std::endl ;
-    *out << cgicc::pre();
-    thisTMB->RedirectOutput(out);
-    thisTMB->DecodeCLCT();
-    thisTMB->PrintCLCT();
-    thisTMB->RedirectOutput(&std::cout);
-    *out << cgicc::pre();
-    *out << cgicc::fieldset();
-
-
-      if (thisTMB->GetGemEnabled()) {
-        *out << cgicc::td();
-        *out << cgicc::td().set("valign", "top");
-        *out << cgicc::fieldset();
-        *out << cgicc::legend("GEM Info").set("style","color:blue") << std::endl ;
-        *out << cgicc::pre();
-        thisTMB->RedirectOutput(out);
-        thisTMB->DecodeGEMHits();
-        thisTMB->PrintGEMHits();
-        thisTMB->RedirectOutput(&std::cout);
-        *out << cgicc::pre();
-        *out << cgicc::fieldset();
-       }
-       if (thisTMB->GetGemEnabled()){
-        *out << cgicc::td();
-        *out << cgicc::table();
-       }
-    // end of function
-/*
-    *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFDDBB") << endl;
-    *out << cgicc::legend("Define Pattern Set").set("style", "color:blue") ;
-    *out << "CFEB CCLUT" << endl;
-    *out << cgicc::form().set("method", "GET").set("action","/" + urn + "/AddCCLUT") << endl;
-    *out << "Bx : " << cgicc::input().set("type","text").set("name","GetCCLUT_bx_char").set("size","7").set("value", GetCCLUT_bx_char) << endl;
-    *out << " Key HalfStrip : " << cgicc::input().set("type","text").set("name","GetCCLUT_key_char").set("size","7").set("value", GetCCLUT_key_char) << endl;
-    *out << " PiD : " << cgicc::input().set("type","text").set("name","GetCCLUT_pid_char").set("size","7").set("value", GetCCLUT_pid_char) << endl;
-    *out << " CCLUT Code : " << cgicc::input().set("type","text").set("name","GetCCLUT_ccode_char").set("size","7").set("value", GetCCLUT_ccode_char) << endl;
-    *out << cgicc::input().set("type","submit").set("value","Add").set("name", "Add CCLUT") << endl;
-    *out << cgicc::form() << endl;
-    *out << cgicc::br() << endl;
-    *out << "GEM Cluster" << endl;
-    *out << cgicc::form().set("method", "GET").set("action","/" + urn + "/AddGEM") << endl;
-    *out << "    real VFAT ID         Vs    natural ID " << cgicc::br() << endl;
-    *out << "roll0: 7,  15,  23       Vs   0,   1,   2 " << cgicc::br() << endl;
-    *out << "roll1: 6,  14,  22       Vs   3,   4,   5 " << cgicc::br() << endl;
-    *out << "roll2: 5,  13,  21       Vs   6,   7,   8 " << cgicc::br() << endl;
-    *out << "roll3: 4,  12,  20       Vs   9,  10,  11 " << cgicc::br() << endl;
-    *out << "roll4: 3,  11,  19       Vs  12,  13,  14 " << cgicc::br() << endl;
-    *out << "roll5: 2,  10,  18       Vs  15,  16,  17 " << cgicc::br() << endl;
-    *out << "roll6: 1,   9,  17       Vs  18,  17,  20 " << cgicc::br() << endl;
-    *out << "roll7: 0,   8,  16       Vs  21,  22,  23 " << cgicc::br() << endl;
-    *out << "Bx : " << cgicc::input().set("type","text").set("name","GetGEM_bx_char").set("size","7").set("value", GetGEM_bx_char) << endl;
-    *out << " Roll(0-7) : " << cgicc::input().set("type","text").set("name","GetGEM_roll_char").set("size","7").set("value", GetGEM_roll_char) << endl;
-    //*out << " Vfat(0-23) : " << cgicc::input().set("type","text").set("name","GetGEM_pad_char").set("size","7").set("value", GetGEM_pad_char) << endl;
-    *out << " Pad(0-191) : " << cgicc::input().set("type","text").set("name","GetGEM_pad_char").set("size","7").set("value", GetGEM_pad_char) << endl;
-    *out << " Size(0-7) : " << cgicc::input().set("type","text").set("name","GetGEM_size_char").set("size","7").set("value", GetGEM_size_char) << endl;
-    *out << " Layer(0-1) : " << cgicc::input().set("type","text").set("name","GetGEM_layer_char").set("size","7").set("value", GetGEM_layer_char) << endl;
-    *out << cgicc::input().set("type","submit").set("value","Add").set("name", "Add GEM") << endl;
-    *out << cgicc::form() << endl;
-    *out << cgicc::fieldset() << endl;
-
     *out << cgicc::fieldset().set("style", "background-color:#FFFFBB; font-size: 11pt") << endl;
     *out << cgicc::legend("Current Pattern Set").set("style","color:blue; font-size: 14pt") << endl;
     *out << cgicc::pre();
@@ -871,7 +707,7 @@ namespace emu {  namespace pc {
     for(int i=0; i < patternSet.CSC.size(); i++){
       *out << patternSet.CSC[i] << endl;
     }
-*/
+
 
     //SASHA LUT DISPLAY
     *out << cgicc::br() << endl;
@@ -1011,6 +847,142 @@ namespace emu {  namespace pc {
     *out << cgicc::input().set("type", "submit").set("value", "Clear Emulator Board").set("name", "Clear Emulator Board") << " Loads Empty patterns to Emulator Board" << endl;
     *out << cgicc::form() << endl;
     *out << cgicc::fieldset() << endl;
+
+    // Towsifa Added Function
+    // Automation Section!!
+    *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
+    *out << cgicc::legend("Parameter Scan").set("style", "color:blue; font-size:14pt");
+    *out << cgicc::form().set("method", "GET").set("action","/" + urn + "/AddCLCTParamScan") << endl;
+    *out << "Bx : " << cgicc::input().set("type","text").set("name","GetCLCT_bx_ps_char").set("size","7").set("value", GetCLCT_bx_ps_char) << endl;
+    *out << " Key HalfStrip : " << cgicc::input().set("type","text").set("name","GetCLCT_key_ps_char").set("size","7").set("value", GetCLCT_key_ps_char) << endl;
+    *out << " PiD : " << cgicc::input().set("type","text").set("name","GetCLCT_pid_ps_char").set("size","7").set("value", GetCLCT_pid_ps_char) << endl;
+    *out << " N Hits : " << cgicc::input().set("type","text").set("name","GetCLCT_nhit_ps_char").set("size","7").set("value", GetCLCT_nhit_ps_char) << endl;
+    *out << cgicc::input().set("type","submit").set("value","Add").set("name", "Add CLCT Param Scan") << endl;
+    *out << cgicc::form() << endl;
+
+    *out << cgicc::form().set("method","GET") << endl;
+    //*out << cgicc::form().set("method", "GET").set("action","/" +urn+ "RunParamScan") << endl;
+    *out << cgicc::table().set("border", "1") << endl;
+    *out << cgicc::td().set("ALIGN", "Center") << endl;
+    *out << cgicc::textarea().set("name", "ParamScanMuonList").set("rows","5").set("cols","150").set("WRAP","OFF");
+    *out << "Muons in Study : " << CLCT_ps_vec.size() << endl;
+    *out << "CSC\n#\tbx\tkey\tpid\tNhit\t\t{ (bx,ly,hs, type) }\n";
+    for(unsigned int i=0; i < CLCT_ps_vec.size(); i++){
+  	*out << i << '\t' << CLCT_ps_vec[i] << endl;
+    }
+
+    *out << cgicc::textarea() << endl;
+    *out << cgicc::td() << endl;
+
+    *out << cgicc::td().set("ALIGN", "Center") << endl;
+    *out << cgicc::textarea().set("name", "ParamScanMuonList").set("rows","5").set("cols","150").set("WRAP","OFF");
+    *out << "Free Parameters : " << Free_params.size() << endl;
+    for(unsigned int i=0; i < Free_params.size(); i++){
+  	*out << Free_params[i] << endl;
+    }
+
+    *out << cgicc::textarea() << endl;
+    *out << cgicc::td() << endl;
+    *out << cgicc::table() << endl;
+    *out << cgicc::br();
+
+  //  *out << cgicc::fieldset() << endl;
+  //  *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
+
+    *out << cgicc::legend("Run Parameter Scan").set("style", "color:blue") ;
+    *out << cgicc::form() << endl;
+  *out << cgicc::form().set("method", "GET").set("action","/" +urn+ "/RunParamScan") << endl;
+    *out << "Trials / Step  " << cgicc::input().set("type","text").set("name","TrialsPerStep_char").set("size","7").set("value",TrialsPerStep_char) << endl;
+    *out << cgicc::br();
+    *out << "Output File  " << cgicc::input().set("type","text").set("name","ParamScanOutFile").set("size","100").set("value",ParamScanOutFile) << endl;
+    *out << cgicc::input().set("type","submit").set("value","Run").set("name", "RunParamScan") << endl;
+    *out << cgicc::form() << endl;
+    *out << cgicc::fieldset() << endl;
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    LOG4CPLUS_INFO(getApplicationLogger(), "Start PrintCounters");
+    thisTMB->RedirectOutput(&OutputStringTMBStatus[tmb]);
+    thisTMB->GetCounters();
+    thisTMB->PrintCounters();
+    thisTMB->PrintGemCounters();
+    thisTMB->RedirectOutput(&std::cout);
+    LOG4CPLUS_INFO(getApplicationLogger(), "Done PrintCounters");
+
+
+
+    *out << cgicc::fieldset().set("style", "font-size: 11pt; background-color:#FFFFBB") << endl;
+    *out << cgicc::legend("Run Parameter Scan").set("style", "color:blue") ;
+    *out << cgicc::form().set("method", "GET").set("action","/" +urn+ "/ClearEmuBoard") << endl;
+    *out << cgicc::input().set("type","submit").set("value","Run").set("name", "RunParamScan") << endl;
+    *out << cgicc::form() << endl;
+    *out << cgicc::fieldset() << endl;
+
+
+
+
+  *out << cgicc::fieldset();
+
+    *out << cgicc::form().set("method","GET") << std::endl ;
+    *out << cgicc::pre();
+    *out << cgicc::textarea().set("name","CrateTestTMBOutput")
+      .set("rows","50")
+      .set("cols","150")
+      .set("WRAP","OFF");
+    *out << OutputStringTMBStatus[tmb].str() << std::endl ;
+    *out << cgicc::textarea();
+    OutputStringTMBStatus[tmb].str("");
+    *out << cgicc::pre();
+    *out << cgicc::form() << std::endl ;
+
+
+  *out << cgicc::legend("CLCT Info").set("style","color:blue") << std::endl ;
+  *out << cgicc::pre();
+  thisTMB->RedirectOutput(out);
+  thisTMB->DecodeCLCT();
+  thisTMB->PrintCLCT();
+  thisTMB->RedirectOutput(&std::cout);
+  *out << cgicc::pre();
+  *out << cgicc::fieldset();
+
+
+    if (thisTMB->GetGemEnabled()) {
+      *out << cgicc::td();
+      *out << cgicc::td().set("valign", "top");
+      *out << cgicc::fieldset();
+      *out << cgicc::legend("GEM Info").set("style","color:blue") << std::endl ;
+      *out << cgicc::pre();
+      thisTMB->RedirectOutput(out);
+      thisTMB->DecodeGEMHits();
+      thisTMB->PrintGEMHits();
+      thisTMB->RedirectOutput(&std::cout);
+      *out << cgicc::pre();
+      *out << cgicc::fieldset();
+     }
+     if (thisTMB->GetGemEnabled()){
+      *out << cgicc::td();
+      *out << cgicc::table();
+     }
+
+    if(thisTMB->GetHardwareVersion() >= 2) {
+      *out << cgicc::fieldset();
+      *out
+        << cgicc::legend("LCT Info: Frames Sent to MPC").set("style", "color:red")
+        << std::endl;
+      *out << cgicc::pre();
+      thisTMB->RedirectOutput(out);
+      //thisTMB->DecodeMPCFrames(); // Decode MPC frames for LAST trigger. VME registers: 0x88, 0x8a, 0x8c, 0x8e
+      //thisTMB->PrintMPCFrames();  // Print  MPC frames for LAST trigger. VME registers: 0x88, 0x8a, 0x8c, 0x8e
+      ////
+      //thisTMB->DecodeMPCFramesFromFIFO(); // Decode MPC frames for ONE trigger from FIFO. VME registers: 0x17C, 0x17E, 0x180, 0x182
+      //thisTMB->PrintMPCFramesFromFIFO();  // Print  MPC frames for ONE trigger from FIFO. VME registers: 0x17C, 0x17E, 0x180, 0x182
+      ////
+      thisTMB->DecodeAndPrintMPCFrames(0); // Decode and print MPC frames for both cases:
+                        //   1. LAST trigger. VME registers: 0x88, 0x8a, 0x8c, 0x8e
+                        //   2. ONE trigger from FIFO. VME registers: 0x17C, 0x17E, 0x180, 0x182
+      thisTMB->RedirectOutput(&std::cout);
+      *out << cgicc::pre();
+      *out << cgicc::fieldset();
+    }
 
 
     emu::utils::footer(out);
