@@ -30,7 +30,7 @@ int nrdat;                 /* number of data bytes read */
   (wpkt = the data to send with header, header filled in eth_write())
   nwdat = number of bytes in wdat to send
   eth_write() => send data and return the number of bytes successfully sent (including header)
-  
+
   To receive data:
   eth_read(0) => read data into buffers and return the number of bytes read (including header)
   rpkt = the header+data received
@@ -67,7 +67,7 @@ int eth_register_mac()
 
 
 int eth_reset()
-{ 
+{
   if(DEBUG>10) std::cout<<"DEBUG[eth_lib.cpp]  eth_reset()"<<std::endl;
   if(ioctl(fd_schar,SCHAR_RESET)){
     printf("Error in SCHAR_RESET \n");
@@ -76,15 +76,15 @@ int eth_reset()
   return 0;
 }
 
-int eth_read(int suppression)
+int eth_read(int suppression, int Mute)
 {
   if(DEBUG>10) std::cout<<"DEBUG[eth_lib.cpp]  eth_read("<<suppression<<")"<<std::endl;
   /*
-   * suppression=0 => pass all packets 
+   * suppression=0 => pass all packets
    * suppression=1 => skip packets with 1-6 bytes and start will 0x03
    * suppression=2 => same as 1, plus ignore packets that begin with 0x33 or 0xff (multicast packets)
    */
-  
+
   int lp;
   nrdat=0;
   do {
@@ -98,15 +98,15 @@ int eth_read(int suppression)
     }
   } while(suppression>1 && nrdat>6 && (rpkt[0]&1)==1); //ignore multicast packets (ignores packet with first byte that is odd)
 
-  if(DEBUG>20){
-    std::cout<<"DEBUG[eth_lib.cpp]  eth_read read packet of "<<nrdat<<" bytes:"<<std::endl;
-    dumphex(nrdat,rdat);
-    std::cout<<std::endl;
-  }
+  //if(DEBUG>20){
+    if (Mute == 0) std::cout<<"DEBUG[eth_lib.cpp]  eth_read read packet of "<<nrdat<<" bytes:"<<std::endl;
+    if (Mute == 0) dumphex(nrdat,rdat);
+    if (Mute == 0) std::cout<<std::endl;
+  //}
   return nrdat;
 }
 
-int eth_write()
+int eth_write(int Mute)
 {
   if(DEBUG>10) std::cout<<"DEBUG[eth_lib.cpp]  eth_write()"<<std::endl;
   if(nwdat>MAX_DAT_SIZE){
@@ -115,11 +115,11 @@ int eth_write()
   }
   int n_written;
   //printf(" Creating the packet... nwdat %d ...",nwdat);
-  if(DEBUG>20){
-    std::cout<<"DEBUG[eth_lib.cpp]  eth_write sending packet of "<<nwdat<<" bytes:"<<std::endl;
-    dumphex(nwdat,wdat);
-    std::cout<<std::endl;
-  }
+  //if(DEBUG>20){
+    if (Mute == 0) std::cout<<"DEBUG[eth_lib.cpp]  eth_write sending packet of "<<nwdat<<" bytes:"<<std::endl;
+    if (Mute == 0) dumphex(nwdat,wdat);
+    if (Mute == 0) std::cout<<std::endl;
+  //}
   n_written = write(fd_schar, (const void *)wpkt, nwdat);
   //printf(" n_written %d \n",n_written);
   return n_written;
@@ -131,4 +131,3 @@ void eth_close()
   close(fd_schar);
   //printf("Closed device\n");
 }
-

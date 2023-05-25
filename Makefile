@@ -4,8 +4,8 @@
 #
 ##
 
-include $(XDAQ_ROOT)/config/mfAutoconf.rules
-include $(XDAQ_ROOT)/config/mfDefs.$(XDAQ_OS)
+include $(XDAQ_ROOT)/${BUILD_SUPPORT}/mfAutoconf.rules
+include $(XDAQ_ROOT)/${BUILD_SUPPORT}/mfDefs.$(XDAQ_OS)
 include $(BUILD_HOME)/emu/rpm_version
 
 # change the optimization level for debugging
@@ -17,7 +17,7 @@ CCFlags = -g -O0 -Wall -fPIC
 # Packages to be built
 #
 Project=emu
-Package=emuDCS/CSCGEMTestStand
+Package=emu/emuDCS/CSCGEMTestStand
 PackageName=CSCGEMTestStand
 Description="CSC-GEM Test Stand"
 
@@ -46,12 +46,13 @@ IncludeDirs = \
 	$(BUILD_HOME)/emu/emuDCS/PeripheralApps/include
 
 TestLibraryDirs = \
-	$(XDAQ_ROOT)/lib 
+	$(XDAQ_ROOT)/lib
 
-UserCFlags  = 
-UserCCFlags = 
+UserCFlags  =
+UserCCFlags = -std=c++11
+UserDynamicLinkFlags =
 UserDynamicLinkFlags = -lboost_regex -lboost_filesystem
-UserStaticLinkFlags = 
+UserStaticLinkFlags =
 UserExecutableLinkFlags =
 
 # These libraries can be platform specific and
@@ -69,11 +70,11 @@ TestLibraries = xerces-c xdaq xdata log4cplus toolbox xoap cgicc xcept xgi peer 
 # Compile the source files and create a shared library
 #
 DynamicLibrary= EmuCSCGEMTestStand
-StaticLibrary= 
+StaticLibrary=
 
 Executables=
-TestExecutables= 
+TestExecutables=
 #	testTableDefinitions.cc \
 
-include $(XDAQ_ROOT)/config/Makefile.rules
-include $(XDAQ_ROOT)/config/mfRPM.rules
+include $(XDAQ_ROOT)/${BUILD_SUPPORT}/Makefile.rules
+include $(XDAQ_ROOT)/${BUILD_SUPPORT}/mfRPM.rules

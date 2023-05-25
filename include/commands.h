@@ -10,10 +10,10 @@
 #include "debug.h"
 #include "eth_lib.h"
 
-int write_command(int num, int adr=0, char* block=0);
+int write_command(int num, int adr=0, char* block=0, int Mute = 0);
 // send command code for given command and address
 
-int read_command(char **pkt);
+int read_command(char **pkt, int Mute = 0);
 // read and set pkt pointer to next packet
 // return >0 is number corresponding to packet type, <0 is error/unrecognized packet
 
@@ -22,7 +22,7 @@ int retrieve_Snap12ErrorCounts(unsigned int* counters);
 // fill the counters array
 // return value!=0 indicates failure
 
-int retrieve_TranslatorErrorCounts(unsigned short* counters); 
+int retrieve_TranslatorErrorCounts(unsigned short* counters);
 // *** the counters array *must* have places for at least 24 elements
 // fill counters array
 // return value!=0 indicates failure

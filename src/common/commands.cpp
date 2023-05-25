@@ -2,7 +2,7 @@
 
 //static int nn=0; // for testing
 
-int write_command(int num, int adr, char* block){
+int write_command(int num, int adr, char* block, int Mute){
   if(DEBUG>10){
     if(block==0) std::cout<<"DEBUG[commands.cpp]  write_command("<<num<<",0,NULL)"<<std::endl;
     else std::cout<<"DEBUG[commands.cpp]  write_command("<<num<<","<<adr<<",{"<<HEX(0xff&block[0])<<HEX(0xff&block[1])<<"...})"<<DEC()<<std::endl;
@@ -71,9 +71,9 @@ int write_command(int num, int adr, char* block){
   //std::cout<<"TESTING: write_command return 0"<<std::endl;
   //return 0;
   // <<< testing
-  
-  int n=eth_write();
-  
+
+  int n=eth_write(Mute);
+
   if(n!=nwdat){
     if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  write_command return -2  <== n="<<n<<" != nwdat="<<nwdat<<std::endl;
     return -2;
@@ -83,11 +83,11 @@ int write_command(int num, int adr, char* block){
 }
 
 
-int read_command(char** pkt){
+int read_command(char** pkt, int Mute){
   if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  read_command(*{NULL})"<<std::endl;
   *pkt=0;
 
-  int n=eth_read(0);
+  int n=eth_read(0, Mute);
 
   // testing >>>
   //std::cout<<"TESTING: read_command, copy wdat to rdat"<<std::endl;
@@ -117,7 +117,7 @@ int read_command(char** pkt){
   int num=0;
   if     ((rdat[0]&0xff) == 0xf0 && (rdat[1]&0xff) == 0xf0) num=0;
   else if((rdat[0]&0xff) == 0xf1 && (rdat[1]&0xff) == 0xf1) num=1;
-  else if((rdat[0]&0xff) == 0xf2 && (rdat[1]&0xff) == 0xf2) num=2; 
+  else if((rdat[0]&0xff) == 0xf2 && (rdat[1]&0xff) == 0xf2) num=2;
   else if((rdat[0]&0xff) == 0xf3 && (rdat[1]&0xff) == 0xf3) num=3; // return packet for F3 will now start with f3f3
   else if((rdat[0]&0xff) == 0xf5 && (rdat[1]&0xff) == 0xf5) num=5;
   else if((rdat[0]&0xff) == 0xf7 && (rdat[1]&0xff) == 0xf7) num=7;
@@ -134,7 +134,7 @@ int read_command(char** pkt){
       num = -num;
     }
   }
-  
+
   if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  read_command return "<<num<<std::endl;
   return num;
 }
@@ -189,12 +189,12 @@ int retrieve_VotingErrorCounts(unsigned int* counters){
 }
 
 
-int retrieve_Snap12ErrorCounts(unsigned int* counters){ 
+int retrieve_Snap12ErrorCounts(unsigned int* counters){
   if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  retrieve_Snap12ErrorCounts("<<*counters<<")"<<std::endl;
 // *** the counters array *must* have places for at least 8 elements
 // fill coutners array
 // return value!=0 indicates failure
-  
+
   //// testing >>>
   //counters[0]++;
   //counters[1]++;
@@ -203,20 +203,20 @@ int retrieve_Snap12ErrorCounts(unsigned int* counters){
   // <<< testing
 
   int commandnum=1;
-  
+
   eth_reset();  // first, clear the buffers
-  
+
   if(write_command(commandnum) != 0){
     if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  retrieve_Snap12ErrorCounts return -1  <== error sending command"<<std::endl;
     return -1;  // send command
   }
-  
+
   char* pkt;
   if(read_command(&pkt) != commandnum){
     if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  retrieve_Snap12ErrorCounts return -2  <== error reading command"<<std::endl;
     return -2;  // get responce
   }
-  
+
   if(sizeof(int)!=4){ // make sure int is 4 bytes
     std::cerr<<"ERROR: sizeof(int)="<<sizeof(int)<<"  This code assume sizeof(int)==4!"<<std::endl;
     return -3;
@@ -224,9 +224,9 @@ int retrieve_Snap12ErrorCounts(unsigned int* counters){
   memcpy(counters, (const void*)&pkt[2], 8*4);  // fill error counts: 8x 4-byte counters
   // Note: this will thrash memory if the counters array does not have 24 places!
   // It is also possible that the bytes in the array are reversed from how they should be in the int, which will take more work to unpack
-  
+
   if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  retrieve_Snap12ErrorCounts return 0"<<std::endl;
-  return 0;  
+  return 0;
 }
 
 
@@ -246,7 +246,7 @@ int retrieve_TranslatorErrorCounts(unsigned short* counters){
   int commandnum=2;
 
   eth_reset();  // first, clear all the buffers
-  
+
   if(write_command(commandnum) != 0){
     if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  retrieve_TranslatorErrorCounts return -1  <== error sending command"<<std::endl;
     return -1;  // send command
@@ -266,9 +266,9 @@ int retrieve_TranslatorErrorCounts(unsigned short* counters){
   memcpy(counters, (const void*)&pkt[2], 24*2);  // fill error counts: 24x 2-byte counters
   // this will thrash memory if the counters array does not have 24 places!
   // Also, bytes in the array are probably reversed from how they should be for a short.  If so, that will have to be fixed!
-  
+
   if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  retrieve_TranslatorErrorCounts return 0"<<std::endl;
-  return 0;  
+  return 0;
 }
 
 
@@ -283,12 +283,12 @@ int send_RAMPage(int pageid, char* block){
   //nn=0;  // testing
 
   eth_reset();  // first, clear all the buffers
-  
+
   if(write_command(commandnum, pageid, block) != 0){
     if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  send_RAMPage return -1  <== error sending command"<<std::endl;
     return -1;  // send command
   }
-  
+
   char* pkt;
   int errnum = read_command(&pkt);
 
@@ -309,13 +309,13 @@ int send_RAMPage(int pageid, char* block){
 	std::cout<<"DEBUG[commands.cpp]  Address word does not match pageid("<<HEX(pageid)<<") : "<<HEX(pkt[2]&0xff)<<HEX(pkt[3]&0xff)<<DEC()<<std::endl;
       }
       if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  send_RAMPage return 98"<<std::endl;
-      return 98;  
+      return 98;
     }
     if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  send_RAMPage return 0"<<std::endl;
-    return 0;  
+    return 0;
   }else if(errnum == -commandnum){
     if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  send_RAMPage return 99  <== mismatched address words"<<std::endl;
-    return 99;  
+    return 99;
   }
 
   if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  send_RAMPage return "<<errnum<<"  <== error reading command"<<std::endl;
@@ -332,9 +332,9 @@ int retrieve_RAMPage(int pageid, char* block, char* hdr){
 
   int commandnum=3;
   //nn=4; //testing
-  
+
   eth_reset();  // first, clear all the buffers
-  
+
   if(write_command(commandnum, pageid) != 0){
     if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  retrieve_RAMPage return -1  <== error sending command"<<std::endl;
     return -1;  // send command
@@ -342,13 +342,13 @@ int retrieve_RAMPage(int pageid, char* block, char* hdr){
 
   char* pkt;
   int errnum = read_command(&pkt);
-  
+
   //memcpy(block, (const void*)&pkt[0], RAMPAGE_SIZE);  // fill 4KB
   //memcpy(block, (const void*)&pkt[10], RAMPAGE_SIZE);  // return packet now starts with f3f3, then 8 byes of 0, and then the page block
   memcpy(hdr, (const void*)&pkt[0], 4);  // return packet should start with f3f3 then an address word
   memcpy(block, (const void*)&pkt[4], RAMPAGE_SIZE);  // then the page block
   // this will thrash memory if the block array is <4KB buffer
-  
+
   if(errnum == commandnum){
     // a final check that the address that the board said it got actually matches what we wanted
     char tmp[2];
@@ -366,15 +366,15 @@ int retrieve_RAMPage(int pageid, char* block, char* hdr){
 	std::cout<<"DEBUG[commands.cpp]  Address word does not match pageid("<<HEX(pageid)<<") : "<<HEX(pkt[2]&0xff)<<HEX(pkt[3]&0xff)<<DEC()<<std::endl;
       }
       if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  retrieve_RAMPage return 98"<<std::endl;
-      return 98;  
+      return 98;
     }
     if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  retrieve_RAMPage return 0"<<std::endl;
-    return 0;  
+    return 0;
   }else if(errnum == -commandnum){
     if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  retrieve_RAMPage return 99  <== mismatched address words"<<std::endl;
     return 99;
   }
-  
+
   if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  retrieve_RAMPage return "<<errnum<<"  <== error reading command"<<std::endl;
   return errnum;  // get responce
 }
@@ -384,14 +384,14 @@ int retrieve_PacketID(int* id){
   if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  retrieve_PacketID("<<*id<<")"<<std::endl;
 // set id to packet id (page number)
 // return value!=0 indicates failure
-  
+
   char* pkt;
   if(read_command(&pkt) == -2){
     if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  retrieve_PacketID return -2  <== error reading command"<<std::endl;
     return -2;  // get packet, anything but -2 is fine
   }
   // above line must be uncommented (i.e. running) for the actual running
-  
+
   // testing >>>
   //   pkt=rdat;
   //   nn+=2;
@@ -399,12 +399,12 @@ int retrieve_PacketID(int* id){
   //   pkt[1] = 0xff&nn;
   // if(nn%256==44) pkt[1]=0xff; // bad
   // <<< testing
-  
+
   id[0] = 0;
   memcpy(id, (const void*)&pkt[1], 1);  // copy packet id byte to id[0]
   //std::cout<<id[0]<<std::endl;
   if(DEBUG>10) std::cout<<"DEBUG[commands.cpp]  retrieve_PacketID return 0"<<std::endl;
-  return 0;  
+  return 0;
 }
 
 
