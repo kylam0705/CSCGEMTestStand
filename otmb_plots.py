@@ -1,185 +1,135 @@
 import numpy as np
 import matplotlib.pyplot as plt 
 import pandas 
+import argparse 
+
+"""""
+This code becomes auotmatic because the parser argument is used. 
+To run on the command line use 'python3 otmb_plotting_automatic.py --sim_filename "<Name of simulation file>" --trig_filename "<Name of corresponding trigger results file>" --n_events "<Number of events to be plotted>" '
+The code will automatically find the trigger results and simulation files in the Results_Files directory (L30 & L31 in the code)
+The resulting plots are then found in the same directory as this code is located.
+"""""
 
 #1: Import CSV files 
 #1a: Get Events
-simulation_6k = pandas.read_csv('/home/Kyla/Results_Files/arrays_to_plot_6362_simulation_events.csv')
-trigger_6k = pandas.read_csv('/home/Kyla/Results_Files/arrays_to_plot_6362_trigger_events.csv')
-simulation_800 = pandas.read_csv('/home/Kyla/Results_Files/arrays_to_plot_802_simulation_events.csv')
-trigger_800 = pandas.read_csv('/home/Kyla/Results_Files/arrays_to_plot_802_trigger_events.csv')
-#print(simulation.columns)
-#print(trigger.columns)
+parser = argparse.ArgumentParser()
+parser.add_argument(
+	"--sim_filename",
+	required = True,
+	default = None,
+	type = str,
+	help = "Provide the name of the **Simulation** file that will be used to produce plots")
 
-#1b: Create Arrays	
-## 6k Events
-#Simulation CLCT0
-sim_clct0_pid_6k = np.array(simulation_6k.sim_clct0_pid)
-sim_clct0_nhit_6k = np.array(simulation_6k.sim_clct0_nhit)
-sim_clct0_cc_code_6k = np.array(simulation_6k.sim_clct0_cc_code)
-#sim_clct0_cc_code_6k= np.delete(sim_clct0_cc_code_6k, 0)
-sim_clct0_bend_6k = np.array(simulation_6k.sim_clct0_bend)
-sim_clct0_slope_6k = np.array(simulation_6k.sim_clct0_slope)
-sim_clct0_KeyHalfStrip_6k = np.array(simulation_6k.sim_clct0_KeyHalfStrip)
-sim_clct0_KeyQuartStrip_6k = np.array(simulation_6k.sim_clct0_KeyQuartStrip)
-sim_clct0_KeyEighthStrip_6k = np.array(simulation_6k.sim_clct0_KeyEighthStrip)
-#Simulation CLCT1
-sim_clct1_pid_6k = np.array(simulation_6k.sim_clct1_pid)
-sim_clct1_nhit_6k = np.array(simulation_6k.sim_clct1_nhit)
-sim_clct1_cc_code_6k = np.array(simulation_6k.sim_clct1_cc_code)
-#sim_clct1_cc_code_6k = np.delete(sim_clct1_cc_code_6k, 0)
-sim_clct1_bend_6k = np.array(simulation_6k.sim_clct1_bend)
-sim_clct1_slope_6k = np.array(simulation_6k.sim_clct1_slope)
-sim_clct1_KeyHalfStrip_6k = np.array(simulation_6k.sim_clct1_KeyHalfStrip)
-sim_clct1_KeyQuartStrip_6k = np.array(simulation_6k.sim_clct1_KeyQuartStrip)
-sim_clct1_KeyEighthStrip_6k = np.array(simulation_6k.sim_clct1_KeyEighthStrip)
-#Trigger CLCT0
-trig_clct0_valid_6k = np.array(trigger_6k.trig_clct0_valid)
-trig_clct0_pid_6k = np.array(trigger_6k.trig_clct0_pid)
-trig_clct0_nhit_6k = np.array(trigger_6k.trig_clct0_nhit)
-trig_clct0_cc_code_6k = np.array(trigger_6k.trig_clct0_cc_code)
-trig_clct0_bend_6k = np.array(trigger_6k.trig_clct0_bend)
-trig_clct0_slope_6k = np.array(trigger_6k.trig_clct0_slope)
-trig_clct0_KeyHalfStrip_6k = np.array(trigger_6k.trig_clct0_KeyHalfStrip)
-trig_clct0_KeyQuartStrip_6k = np.array(trigger_6k.trig_clct0_KeyQuartStrip)
-trig_clct0_KeyEighthStrip_6k = np.array(trigger_6k.trig_clct0_KeyEighthStrip)
-#Trigger CLCT1
-trig_clct1_valid_6k = np.array(trigger_6k.trig_clct1_valid)
-trig_clct1_pid_6k = np.array(trigger_6k.trig_clct1_pid)
-trig_clct1_nhit_6k = np.array(trigger_6k.trig_clct1_nhit)
-trig_clct1_cc_code_6k = np.array(trigger_6k.trig_clct1_cc_code)
-trig_clct1_bend_6k = np.array(trigger_6k.trig_clct1_bend)
-trig_clct1_slope_6k = np.array(trigger_6k.trig_clct1_slope)
-trig_clct1_KeyHalfStrip_6k = np.array(trigger_6k.trig_clct1_KeyHalfStrip)
-trig_clct1_KeyQuartStrip_6k = np.array(trigger_6k.trig_clct1_KeyQuartStrip)
-trig_clct1_KeyEighthStrip_6k = np.array(trigger_6k.trig_clct1_KeyEighthStrip)
-#800 Events
-#Simulation CLCT0
-sim_clct0_pid_800 = np.array(simulation_800.sim_clct0_pid)
-sim_clct0_nhit_800 = np.array(simulation_800.sim_clct0_nhit)
-sim_clct0_cc_code_800 = np.array(simulation_800.sim_clct0_cc_code)
-sim_clct0_bend_800 = np.array(simulation_800.sim_clct0_bend)
-sim_clct0_slope_800 = np.array(simulation_800.sim_clct0_slope)
-sim_clct0_KeyHalfStrip_800 = np.array(simulation_800.sim_clct0_KeyHalfStrip)
-sim_clct0_KeyQuartStrip_800 = np.array(simulation_800.sim_clct0_KeyQuartStrip)
-sim_clct0_KeyEighthStrip_800 = np.array(simulation_800.sim_clct0_KeyEighthStrip)
-#Simulation CLCT1
-sim_clct1_pid_800 = np.array(simulation_800.sim_clct1_pid)
-sim_clct1_nhit_800 = np.array(simulation_800.sim_clct1_nhit)
-sim_clct1_cc_code_800 = np.array(simulation_800.sim_clct1_cc_code)
-sim_clct1_bend_800 = np.array(simulation_800.sim_clct1_bend)
-sim_clct1_slope_800 = np.array(simulation_800.sim_clct1_slope)
-sim_clct1_KeyHalfStrip_800 = np.array(simulation_800.sim_clct1_KeyHalfStrip)
-sim_clct1_KeyQuartStrip_800 = np.array(simulation_800.sim_clct1_KeyQuartStrip)
-sim_clct1_KeyEighthStrip_800 = np.array(simulation_800.sim_clct1_KeyEighthStrip)
-#Trigger CLCT0
-trig_clct0_valid_800 = np.array(trigger_800.trig_clct0_valid)
-trig_clct0_pid_800 = np.array(trigger_800.trig_clct0_pid)
-trig_clct0_nhit_800 = np.array(trigger_800.trig_clct0_nhit)
-trig_clct0_cc_code_800 = np.array(trigger_800.trig_clct0_cc_code)
-trig_clct0_bend_800 = np.array(trigger_800.trig_clct0_bend)
-trig_clct0_slope_800 = np.array(trigger_800.trig_clct0_slope)
-trig_clct0_KeyHalfStrip_800 = np.array(trigger_800.trig_clct0_KeyHalfStrip)
-trig_clct0_KeyQuartStrip_800 = np.array(trigger_800.trig_clct0_KeyQuartStrip)
-trig_clct0_KeyEighthStrip_800 = np.array(trigger_800.trig_clct0_KeyEighthStrip)
-#Trigger CLCT1
-trig_clct1_valid_800 = np.array(trigger_800.trig_clct1_valid)
-trig_clct1_pid_800 = np.array(trigger_800.trig_clct1_pid)
-trig_clct1_nhit_800 = np.array(trigger_800.trig_clct1_nhit)
-trig_clct1_cc_code_800 = np.array(trigger_800.trig_clct1_cc_code)
-trig_clct1_bend_800 = np.array(trigger_800.trig_clct1_bend)
-trig_clct1_slope_800 = np.array(trigger_800.trig_clct1_slope)
-trig_clct1_KeyHalfStrip_800 = np.array(trigger_800.trig_clct1_KeyHalfStrip)
-trig_clct1_KeyQuartStrip_800 = np.array(trigger_800.trig_clct1_KeyQuartStrip)
-trig_clct1_KeyEighthStrip_800 = np.array(trigger_800.trig_clct1_KeyEighthStrip)
+parser.add_argument(
+	"--trig_filename",
+	required = True,
+	default = None,
+	type = str,
+	help = "Provide the name of the **Trigger** file that will be used to produce plots")
+
+parser.add_argument(
+	"--n_events",
+	required = True,
+	default = None,
+	type = str,
+	help = "Provide the number of events that the OTMB was tested on")
+args = parser.parse_args()
+
+sim_file_path = "/home/cscdev/Kyla/Results_Files/" + args.sim_filename
+trig_file_path = "/home/cscdev/Kyla/Results_Files/" + args.trig_filename
+
+Simulation = pandas.read_csv(sim_file_path)
+Trigger = pandas.read_csv(trig_file_path)
+
+
+#1b: Create Arrays
+## Simulation 
+sim_clct0_pid = np.array(Simulation.sim_clct0_pid)
+sim_clct0_nhit = np.array(Simulation.sim_clct0_nhit)
+sim_clct0_cc_code = np.array(Simulation.sim_clct0_cc_code)
+sim_clct0_bend = np.array(Simulation.sim_clct0_bend)
+sim_clct0_slope = np.array(Simulation.sim_clct0_slope)
+sim_clct0_KeyHalfStrip = np.array(Simulation.sim_clct0_KeyHalfStrip)
+sim_clct0_KeyQuartStrip = np.array(Simulation.sim_clct0_KeyQuartStrip)
+sim_clct0_KeyEighthStrip = np.array(Simulation.sim_clct0_KeyEighthStrip)
+
+sim_clct1_pid = np.array(Simulation.sim_clct1_pid)
+sim_clct1_nhit = np.array(Simulation.sim_clct1_nhit)
+sim_clct1_cc_code = np.array(Simulation.sim_clct1_cc_code)
+sim_clct1_bend = np.array(Simulation.sim_clct1_bend)
+sim_clct1_slope = np.array(Simulation.sim_clct1_slope)
+sim_clct1_KeyHalfStrip = np.array(Simulation.sim_clct1_KeyHalfStrip)
+sim_clct1_KeyQuartStrip = np.array(Simulation.sim_clct1_KeyQuartStrip)
+sim_clct1_KeyEighthStrip = np.array(Simulation.sim_clct1_KeyEighthStrip)
+
+##Trigger
+trig_clct0_valid = np.array(Trigger.trig_clct0_valid)
+trig_clct0_pid = np.array(Trigger.trig_clct0_pid)
+trig_clct0_nhit = np.array(Trigger.trig_clct0_nhit)
+trig_clct0_cc_code = np.array(Trigger.trig_clct0_cc_code)
+trig_clct0_bend = np.array(Trigger.trig_clct0_bend)
+trig_clct0_slope = np.array(Trigger.trig_clct0_slope)
+trig_clct0_KeyHalfStrip = np.array(Trigger.trig_clct0_KeyHalfStrip)
+trig_clct0_KeyQuartStrip = np.array(Trigger.trig_clct0_KeyQuartStrip)
+trig_clct0_KeyEighthStrip = np.array(Trigger.trig_clct0_KeyEighthStrip)
+
+trig_clct1_valid = np.array(Trigger.trig_clct1_valid)
+trig_clct1_pid = np.array(Trigger.trig_clct1_pid)
+trig_clct1_nhit = np.array(Trigger.trig_clct1_nhit)
+trig_clct1_cc_code = np.array(Trigger.trig_clct1_cc_code)
+trig_clct1_bend = np.array(Trigger.trig_clct1_bend)
+trig_clct1_slope = np.array(Trigger.trig_clct1_slope)
+trig_clct1_KeyHalfStrip = np.array(Trigger.trig_clct1_KeyHalfStrip)
+trig_clct1_KeyQuartStrip = np.array(Trigger.trig_clct1_KeyQuartStrip)
+trig_clct1_KeyEighthStrip = np.array(Trigger.trig_clct1_KeyEighthStrip)
 
 #Remove invalid events
-for i in range(len(trig_clct0_pid_6k)):
-	if (trig_clct0_valid_6k[i] == 0):
-		trig_clct0_pid_6k[i] = -1
-		trig_clct0_nhit_6k[i] = -1
-		trig_clct0_cc_code_6k[i] = -1
-		trig_clct0_bend_6k[i] = -1
-		trig_clct0_slope_6k[i] = -1
-		trig_clct0_KeyHalfStrip_6k[i] = -1
-		trig_clct0_KeyQuartStrip_6k[i] = -1
-		trig_clct0_KeyEighthStrip_6k[i] = -1
+for i in range(len(trig_clct0_pid)):
+	if (trig_clct0_valid[i] == 0):
+		trig_clct0_pid[i] = -1
+		trig_clct0_nhit[i] = -1
+		trig_clct0_cc_code[i] = -1
+		trig_clct0_bend[i] = -1
+		trig_clct0_slope[i] = -1
+		trig_clct0_KeyHalfStrip[i] = -1
+		trig_clct0_KeyQuartStrip[i] = -1
+		trig_clct0_KeyEighthStrip[i] = -1
 		
-		sim_clct0_pid_6k[i] = -1
-		sim_clct0_nhit_6k[i] = -1
-		sim_clct0_cc_code_6k[i] = -1
-		sim_clct0_bend_6k[i] = -1
-		sim_clct0_slope_6k[i] = -1
-		sim_clct0_KeyHalfStrip_6k[i] = -1
-		sim_clct0_KeyQuartStrip_6k[i] = -1
-		sim_clct0_KeyEighthStrip_6k[i] = -1
-for i in range(len(trig_clct1_pid_6k)):
-	if (trig_clct1_valid_6k[i] == 0):
-		trig_clct1_pid_6k[i] = -1
-		trig_clct1_nhit_6k[i] = -1
-		trig_clct1_cc_code_6k[i] = -1
-		trig_clct1_bend_6k[i] = -1
-		trig_clct1_slope_6k[i] = -1
-		trig_clct1_KeyHalfStrip_6k[i] = -1
-		trig_clct1_KeyQuartStrip_6k[i] = -1
-		trig_clct1_KeyEighthStrip_6k[i] = -1
+		sim_clct0_pid[i] = -1
+		sim_clct0_nhit[i] = -1
+		sim_clct0_cc_code[i] = -1
+		sim_clct0_bend[i] = -1
+		sim_clct0_slope[i] = -1
+		sim_clct0_KeyHalfStrip[i] = -1
+		sim_clct0_KeyQuartStrip[i] = -1
+		sim_clct0_KeyEighthStrip[i] = -1
 
-		sim_clct1_pid_6k[i] = -1
-		sim_clct1_nhit_6k[i] = -1
-		sim_clct1_cc_code_6k[i] = -1
-		sim_clct1_bend_6k[i] = -1
-		sim_clct1_slope_6k[i] = -1
-		sim_clct1_KeyHalfStrip_6k[i] = -1
-		sim_clct1_KeyQuartStrip_6k[i] = -1
-		sim_clct1_KeyEighthStrip_6k[i] = -1
-for i in range(len(trig_clct0_pid_800)):
-	if (trig_clct0_valid_800[i] == 0):
-		trig_clct0_pid_800[i] = -1
-		trig_clct0_nhit_800[i] = -1
-		trig_clct0_cc_code_800[i] = -1
-		trig_clct0_bend_800[i] = -1
-		trig_clct0_slope_800[i] = -1
-		trig_clct0_KeyHalfStrip_800[i] = -1
-		trig_clct0_KeyQuartStrip_800[i] = -1
-		trig_clct0_KeyEighthStrip_800[i] = -1
+for i in range(len(trig_clct1_pid)):
+	if (trig_clct1_valid[i] == 0):
+		trig_clct1_pid[i] = -1
+		trig_clct1_nhit[i] = -1
+		trig_clct1_cc_code[i] = -1
+		trig_clct1_bend[i] = -1
+		trig_clct1_slope[i] = -1
+		trig_clct1_KeyHalfStrip[i] = -1
+		trig_clct1_KeyQuartStrip[i] = -1
+		trig_clct1_KeyEighthStrip[i] = -1
+		
+		sim_clct1_pid[i] = -1
+		sim_clct1_nhit[i] = -1
+		sim_clct1_cc_code[i] = -1
+		sim_clct1_bend[i] = -1
+		sim_clct1_slope[i] = -1
+		sim_clct1_KeyHalfStrip[i] = -1
+		sim_clct1_KeyQuartStrip[i] = -1
+		sim_clct1_KeyEighthStrip[i] = -1
 
-		sim_clct0_pid_800[i] = -1
-		sim_clct0_nhit_800[i] = -1
-		sim_clct0_cc_code_800[i] = -1
-		sim_clct0_bend_800[i] = -1
-		sim_clct0_slope_800[i] = -1
-		sim_clct0_KeyHalfStrip_800[i] = -1
-		sim_clct0_KeyQuartStrip_800[i] = -1
-		sim_clct0_KeyEighthStrip_800[i] = -1
-for i in range(len(trig_clct1_pid_800)):
-	if (trig_clct1_valid_800[i] == 0):
-		trig_clct1_pid_800[i] = -1
-		trig_clct1_nhit_800[i] = -1
-		trig_clct1_cc_code_800[i] = -1
-		trig_clct1_bend_800[i] = -1
-		trig_clct1_slope_800[i] = -1
-		trig_clct1_KeyHalfStrip_800[i] = -1
-		trig_clct1_KeyQuartStrip_800[i] = -1
-		trig_clct1_KeyEighthStrip_800[i] = -1
+#2: List of Variables
+simulation_names0 = [sim_clct0_pid, sim_clct0_nhit, sim_clct0_cc_code, sim_clct0_bend, sim_clct0_slope, sim_clct0_KeyHalfStrip, sim_clct0_KeyQuartStrip, sim_clct0_KeyEighthStrip]
+simulation_names1 = [sim_clct1_pid, sim_clct1_nhit, sim_clct1_cc_code, sim_clct1_bend, sim_clct1_slope, sim_clct1_KeyHalfStrip, sim_clct1_KeyQuartStrip, sim_clct1_KeyEighthStrip]
+trigger_names0 = [trig_clct0_pid, trig_clct0_nhit, trig_clct0_cc_code, trig_clct0_bend, trig_clct0_slope, trig_clct0_KeyHalfStrip, trig_clct0_KeyQuartStrip, trig_clct0_KeyEighthStrip]
+trigger_names1 = [trig_clct1_pid, trig_clct1_nhit, trig_clct1_cc_code, trig_clct1_bend, trig_clct1_slope, trig_clct1_KeyHalfStrip, trig_clct1_KeyQuartStrip, trig_clct1_KeyEighthStrip]
 
-		sim_clct1_pid_800[i] = -1
-		sim_clct1_nhit_800[i] = -1
-		sim_clct1_cc_code_800[i] = -1
-		sim_clct1_bend_800[i] = -1
-		sim_clct1_slope_800[i] = -1
-		sim_clct1_KeyHalfStrip_800[i] = -1
-		sim_clct1_KeyQuartStrip_800[i] = -1
-		sim_clct1_KeyEighthStrip_800[i] = -1
-
-#2: Lists of Everything
-simulation_names0_6k = [sim_clct0_pid_6k, sim_clct0_nhit_6k, sim_clct0_cc_code_6k, sim_clct0_bend_6k, sim_clct0_slope_6k, sim_clct0_KeyHalfStrip_6k, sim_clct0_KeyQuartStrip_6k, sim_clct0_KeyEighthStrip_6k]
-simulation_names1_6k = [sim_clct1_pid_6k, sim_clct1_nhit_6k, sim_clct1_cc_code_6k, sim_clct1_bend_6k, sim_clct1_slope_6k, sim_clct1_KeyHalfStrip_6k, sim_clct1_KeyQuartStrip_6k, sim_clct1_KeyEighthStrip_6k]
-trigger_names0_6k = [trig_clct0_pid_6k, trig_clct0_nhit_6k, trig_clct0_cc_code_6k, trig_clct0_bend_6k, trig_clct0_slope_6k, trig_clct0_KeyHalfStrip_6k, trig_clct0_KeyQuartStrip_6k, trig_clct0_KeyEighthStrip_6k]
-trigger_names1_6k = [trig_clct1_pid_6k, trig_clct1_nhit_6k, trig_clct1_cc_code_6k, trig_clct1_bend_6k, trig_clct1_slope_6k, trig_clct1_KeyHalfStrip_6k, trig_clct1_KeyQuartStrip_6k, trig_clct1_KeyEighthStrip_6k]
-simulation_names0_800 = [sim_clct0_pid_800, sim_clct0_nhit_800, sim_clct0_cc_code_800, sim_clct0_bend_800, sim_clct0_slope_800, sim_clct0_KeyHalfStrip_800, sim_clct0_KeyQuartStrip_800, sim_clct0_KeyEighthStrip_800]
-simulation_names1_800 = [sim_clct1_pid_800, sim_clct1_nhit_800, sim_clct1_cc_code_800, sim_clct1_bend_800, sim_clct1_slope_800, sim_clct1_KeyHalfStrip_800, sim_clct1_KeyQuartStrip_800, sim_clct1_KeyEighthStrip_800]
-trigger_names0_800 = [trig_clct0_pid_800, trig_clct0_nhit_800, trig_clct0_cc_code_800, trig_clct0_bend_800, trig_clct0_slope_800, trig_clct0_KeyHalfStrip_800, trig_clct0_KeyQuartStrip_800, trig_clct0_KeyEighthStrip_800]
-trigger_names1_800 = [trig_clct1_pid_800, trig_clct1_nhit_800, trig_clct1_cc_code_800, trig_clct1_bend_800, trig_clct1_slope_800, trig_clct1_KeyHalfStrip_800, trig_clct1_KeyQuartStrip_800, trig_clct1_KeyEighthStrip_800]
 variables = ["pID", "Quality", "CC_Code", "Bend", "Slope", "KeyHalfstrip", "KeyQuartstrip", "KeyEighthstrip"]
 fancy_variable_names = ["Pattern ID", "Quality", "CC Code", "Bend", "Slope", "Key Halfstrip", "Key Quartstrip", "Key Eighthstrip"]
 
@@ -423,10 +373,7 @@ i = 0
 for key,values in plotting_values.items():
 	#for i in range(len(variables)):
 	print("Making plot for: ", key)
-	print("Making plot for 6,000 events")
-	make_ratio_plots(simulation_names0_6k[i], simulation_names1_6k[i], trigger_names0_6k[i], trigger_names1_6k[i], plotting_values[key]["binning"], "6k", plotting_values[key]["x_range"], plotting_values[key]["nice_variable_name"], plotting_values[key]["variable_name"])
-	print("Making plot for 800 events")
-	make_ratio_plots(simulation_names0_800[i], simulation_names1_800[i], trigger_names0_800[i], trigger_names1_800[i], plotting_values[key]["binning"], "800", plotting_values[key]["x_range"], plotting_values[key]["nice_variable_name"], plotting_values[key]["variable_name"])
+	make_ratio_plots(simulation_names0[i], simulation_names1[i], trigger_names0[i], trigger_names1[i], plotting_values[key]["binning"], args.n_events, plotting_values[key]["x_range"], plotting_values[key]["nice_variable_name"], plotting_values[key]["variable_name"])
 	#make_ratio_logplots(simulation_names0_6k[i], simulation_names1_6k[i], trigger_names0_6k[i], trigger_names1_6k[i], plotting_values[key]["binning"], "6k", plotting_values[key]["x_range"], plotting_values[key]["nice_variable_name"], plotting_values[key]["variable_name"])
 	#make_ratio_logplots(simulation_names0_800[i], simulation_names1_800[i], trigger_names0_800[i], trigger_names1_800[i], plotting_values[key]["binning"], "800", plotting_values[key]["x_range"], plotting_values[key]["nice_variable_name"], plotting_values[key]["variable_name"])
 	i+=1
