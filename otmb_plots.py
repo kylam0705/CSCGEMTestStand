@@ -35,8 +35,8 @@ parser.add_argument(
 	help = "Provide the number of events that the OTMB was tested on")
 args = parser.parse_args()
 
-sim_file_path = "/home/cscdev/Kyla/Results_Files/" + args.sim_filename
-trig_file_path = "/home/cscdev/Kyla/Results_Files/" + args.trig_filename
+#sim_file_path = "/home/cscdev/Kyla/Results_Files/" + args.sim_filename
+#trig_file_path = "/home/cscdev/Kyla/Results_Files/" + args.trig_filename
 
 sim_file_path = "/Users/kyla0705/Results_Files/" + args.sim_filename
 trig_file_path = "/Users/kyla0705/Results_Files/" + args.trig_filename
@@ -285,7 +285,7 @@ def make_ratio_plots(sim_clct0, sim_clct1, trig_clct0, trig_clct1, binning, even
 
 	ax2.legend(loc="lower left")
 	ax2.ticklabel_format(style = 'scientific', axis = 'y', scilimits=(-2,-2))
-	plt.savefig("linear_scale_%s_%s_events.pdf" %(variables, event_number))
+	plt.savefig("%s_scale_%s_%s_events.pdf" %(scaling, variables, event_number))
 
 #5: Make Plots 
 i = 0
